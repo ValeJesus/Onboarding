@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerenciador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.9 4.5 11 8l3.5 1.1L11 10.2 9.9 13.7 8.8 10.2 5.3 9.1 8.8 8z"/><path d="M18 13v4M16 15h4M17 3v3M15.5 4.5h3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <span class="brand-logo"><svg class="ico"><use href="#i-layers"/></svg></span>
+      <span><strong>Gerenciador</strong><small>CRUD com estilo</small></span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" type="button" data-aba="ia" title="Assistente IA"><svg class="ico"><use href="#i-sparkles"/></svg></button>
+      <button class="btn-primary" type="button" id="btn-novo"><svg class="ico"><use href="#i-plus"/></svg> Novo item</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" aria-label="Seções">
+    <button class="tab active" type="button" data-aba="itens"><svg class="ico"><use href="#i-layers"/></svg> Itens</button>
+    <button class="tab" type="button" data-aba="analises"><svg class="ico"><use href="#i-chart"/></svg> Análises</button>
+    <button class="tab" type="button" data-aba="ia"><svg class="ico"><use href="#i-chat"/></svg> IA</button>
+  </nav>
+
+  <!-- ========== ITENS ========== -->
+  <section id="aba-itens" class="aba active">
+    <div class="stat-grid" id="cards"></div>
+
+    <div class="filters">
+      <label class="search">
+        <svg class="ico"><use href="#i-search"/></svg>
+        <input type="search" id="busca" placeholder="Buscar itens...">
+      </label>
+      <label class="select">
+        <select id="f-status">
+          <option value="">Todos</option>
+          <option value="pendente">Pendente</option>
+          <option value="ativo">Ativo</option>
+          <option value="concluido">Concluído</option>
+        </select>
+        <svg class="ico"><use href="#i-chevron"/></svg>
+      </label>
+      <label class="select">
+        <select id="f-cat">
+          <option value="">Todas</option>
+          <option value="trabalho">Trabalho</option>
+          <option value="pessoal">Pessoal</option>
+          <option value="ideia">Ideia</option>
+          <option value="estudo">Estudo</option>
+        </select>
+        <svg class="ico"><use href="#i-chevron"/></svg>
+      </label>
+    </div>
+
+    <div class="list-meta"><span id="contagem"></span><span id="rotulo-status">Todos os status</span></div>
+    <div class="list" id="lista"></div>
+  </section>
+
+  <!-- ========== ANÁLISES ========== -->
+  <section id="aba-analises" class="aba">
+    <div class="stat-grid flat" id="kpis"></div>
+
+    <div class="chart-grid">
+      <article class="card">
+        <header class="card-h"><h3>Distribuição por status</h3><span>proporção atual</span></header>
+        <div class="donut-wrap" id="g-status"></div>
+      </article>
+      <article class="card">
+        <header class="card-h"><h3>Itens criados por dia</h3><span>últimos 14 dias</span></header>
+        <div id="g-dia"></div>
+      </article>
+      <article class="card">
+        <header class="card-h"><h3>Por prioridade</h3><span>quantos por nível</span></header>
+        <div class="hbars" id="g-prio"></div>
+      </article>
+      <article class="card">
+        <header class="card-h"><h3>Por categoria</h3><span>distribuição temática</span></header>
+        <div class="vbars" id="g-cat"></div>
+      </article>
+    </div>
+
+    <div class="callout" id="taxa"></div>
+  </section>
+
+  <!-- ========== IA ========== -->
+  <section id="aba-ia" class="aba">
+    <div class="chat card">
+      <header class="chat-h">
+        <span class="stat-ico violet"><svg class="ico"><use href="#i-sparkles"/></svg></span>
+        <div><strong>Assistente do Gerenciador</strong><small>Analisa suas tarefas e responde em português</small></div>
+      </header>
+      <div class="chat-body" id="chat-body">
+        <div class="chat-empty" id="chat-empty">
+          <span class="empty-ico"><svg class="ico"><use href="#i-sparkles"/></svg></span>
+          <h3>Pergunte sobre suas tarefas</h3>
+          <p>Eu tenho acesso ao resumo dos seus itens e posso sugerir próximos passos.</p>
+          <div class="chips">
+            <button type="button" class="chip">Quantas tarefas estão pendentes?</button>
+            <button type="button" class="chip">Qual a taxa de conclusão da semana?</button>
+            <button type="button" class="chip">Quais itens da categoria trabalho estão ativos?</button>
+            <button type="button" class="chip">Me dê 3 sugestões para organizar minha semana.</button>
+          </div>
+        </div>
+      </div>
+      <form class="chat-form" id="chat-form" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="Pergunte sobre suas tarefas..." maxlength="300">
+        <button class="send" aria-label="Enviar"><svg class="ico"><use href="#i-send"/></svg></button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- Modal novo / editar -->
+<dialog id="modal">
+  <form id="modal-form" class="modal-form">
+    <header>
+      <h2 id="modal-title">Novo item</h2>
+      <button type="button" class="btn-icon sm" id="modal-x" aria-label="Fechar"><svg class="ico"><use href="#i-x"/></svg></button>
+    </header>
+    <label>Título<input id="f-titulo" required maxlength="120" placeholder="O que precisa ser feito?"></label>
+    <label>Descrição<textarea id="f-descricao" rows="3" maxlength="300" placeholder="Detalhes opcionais"></textarea></label>
+    <div class="row3">
+      <label>Status
+        <select id="f-m-status">
+          <option value="pendente">Pendente</option>
+          <option value="ativo">Ativo</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </label>
+      <label>Prioridade
+        <select id="f-m-prioridade">
+          <option value="baixa">Baixa</option>
+          <option value="media" selected>Média</option>
+          <option value="alta">Alta</option>
+          <option value="urgente">Urgente</option>
+        </select>
+      </label>
+      <label>Categoria
+        <select id="f-m-categoria">
+          <option value="trabalho">Trabalho</option>
+          <option value="pessoal" selected>Pessoal</option>
+          <option value="ideia">Ideia</option>
+          <option value="estudo">Estudo</option>
+        </select>
+      </label>
+    </div>
+    <footer>
+      <button type="button" class="btn-ghost" id="modal-cancel">Cancelar</button>
+      <button class="btn-primary" type="submit">Salvar</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Assistente virtual (widget) -->
+<div class="assist-hint" id="assist-hint" role="button" tabindex="0">Se você sentir que precisa de algo, pode contar comigo</div>
+<button type="button" class="assist-fab" id="assist-fab" aria-label="Abrir assistente" aria-expanded="false" aria-controls="assist-panel">
+  <span class="avatar"></span>
+</button>
+
+<section class="assist-panel" id="assist-panel" role="dialog" aria-label="Assistente virtual" hidden>
+  <header class="assist-head">
+    <span class="avatar"></span>
+    <div class="assist-id"><strong id="assist-nome"></strong><small>Assistente Virtual</small></div>
+    <div class="assist-tools">
+      <div class="assist-menu" id="assist-menu" hidden>
+        <button type="button" class="head-btn" id="assist-dots" aria-label="Mais opções" aria-haspopup="true" aria-expanded="false"><svg class="ico"><use href="#i-more"/></svg></button>
+        <div class="assist-pop" id="assist-pop" hidden>
+          <button type="button" id="assist-reset">Reconfigurar assistente</button>
+        </div>
+      </div>
+      <button type="button" class="head-btn" id="assist-close" aria-label="Fechar"><svg class="ico"><use href="#i-x"/></svg></button>
+    </div>
+  </header>
+
+  <!-- Tela 1: estilo -->
+  <div class="tela active" data-tela="1">
+    <div class="stepper"><span class="st on">1</span><span class="seg"></span><span class="st">2</span><span class="seg"></span><span class="st">3</span></div>
+    <p class="ask">Oi! Como você gostaria que eu seja?</p>
+    <div class="opcoes" role="radiogroup" aria-label="Estilo da assistente" data-grupo="estilo">
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="amigavel">
+        <span class="oi violeta"><svg class="ico"><use href="#i-sparkles"/></svg></span>
+        <span class="otxt"><b>Amigável</b><small>Uma assistente próxima e descontraída</small></span>
+      </button>
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="profissional">
+        <span class="oi azul"><svg class="ico"><use href="#i-briefcase"/></svg></span>
+        <span class="otxt"><b>Profissional</b><small>Direta e objetiva</small></span>
+      </button>
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="paciente">
+        <span class="oi rosa"><svg class="ico"><use href="#i-heart"/></svg></span>
+        <span class="otxt"><b>Paciente</b><small>Sempre calma e acolhedora</small></span>
+      </button>
+    </div>
+    <button type="button" class="assist-cta" id="cta-1" disabled>Escolher</button>
+  </div>
+
+  <!-- Tela 2: modo de trabalho -->
+  <div class="tela" data-tela="2">
+    <div class="stepper"><span class="st ok">1</span><span class="seg ok"></span><span class="st on">2</span><span class="seg"></span><span class="st">3</span></div>
+    <p class="ask">Como você prefere trabalhar comigo?</p>
+    <div class="opcoes" role="radiogroup" aria-label="Modo de trabalho" data-grupo="modo">
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="rapidas">
+        <span class="oi laranja"><svg class="ico"><use href="#i-zap"/></svg></span>
+        <span class="otxt"><b>Respostas rápidas</b><small>Direto ao ponto</small></span>
+      </button>
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="explicacoes">
+        <span class="oi indigo"><svg class="ico"><use href="#i-list"/></svg></span>
+        <span class="otxt"><b>Com explicações</b><small>Passo a passo</small></span>
+      </button>
+      <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="exemplos">
+        <span class="oi navy"><svg class="ico"><use href="#i-cap"/></svg></span>
+        <span class="otxt"><b>Com exemplos</b><small>Usando situações reais</small></span>
+      </button>
+    </div>
+    <button type="button" class="assist-cta" id="cta-2" disabled>Continuar</button>
+  </div>
+
+  <!-- Tela 3: conversa -->
+  <div class="tela chat" data-tela="chat">
+    <div class="chat-msgs" id="assist-msgs" aria-live="polite"></div>
+    <form class="assist-form" id="assist-form" autocomplete="off">
+      <input id="assist-input" type="text" placeholder="Digite sua mensagem..." maxlength="300">
+      <button class="enviar" aria-label="Enviar"><svg class="ico"><use href="#i-plane"/></svg></button>
+    </form>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

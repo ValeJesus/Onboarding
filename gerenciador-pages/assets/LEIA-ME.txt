@@ -1,0 +1,2 @@
+Coloque aqui a foto da assistente com o nome: assistente.png
+(quadrada funciona melhor; ela aparece no botao flutuante, no topo do painel e nas mensagens)
