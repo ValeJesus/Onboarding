@@ -1,9 +1,9 @@
-// Dicas apresentadas na ordem em que as dúvidas são coletadas.
+// Pistas apresentadas na ordem em que são coletadas.
 window.DIALOGS = [
-  "Perguntar não é fraqueza: é o jeito mais rápido de aprender.",
-  "Anote o que te explicarem. Ninguém lembra de tudo.",
-  "Antes de pedir ajuda, mostre o que você já tentou.",
-  "Conheça pessoas além do seu setor: o trabalho é feito em rede.",
+  "Observe como as pessoas se comunicam antes de escrever a primeira mensagem.",
+  "Cada pessoa do time sabe algo que você ainda não sabe. Descubra quem sabe o quê.",
+  "Perguntar é uma forma de pesquisar, e quem pesquisa erra menos.",
+  "Anote o que aprender: o que você observa hoje vira o seu plano amanhã.",
   "Errar no começo é esperado. Esconder o erro é o que pesa."
 ];
 
@@ -11,12 +11,12 @@ window.DIALOGS = [
 window.NPC_DIALOGS = {
   1: [
     "Oi! Eu sou a Marina, sua mentora. Bem-vindo ao estúdio!",
-    "Hoje é seu primeiro dia, e tudo parece confuso. Isso é normal!",
-    "Colete as dúvidas respondidas, fuja da Confusão e me encontre na sala da equipe."
+    "Ninguém vira parte do time no primeiro dia. Quem observa antes de agir chega mais longe.",
+    "Leve este guia e colete as pistas pelo prédio: elas mostram como o time trabalha. Cuidado com as Distrações!"
   ],
   2: [
     "Os lasers estão no meu sistema.",
     "Ative o interruptor e eu libero a passagem por alguns segundos.",
-    "Corre, que não demora muito!"
+    "Segure Shift para correr nos trechos livres. Observe os lasers e corra!"
   ]
 };

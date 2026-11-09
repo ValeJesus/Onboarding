@@ -3,12 +3,13 @@
 const LARGURA_TELA = 800;
 const ALTURA_TELA = 450;
 const ALTURA_FASE = 1200;
+const LIMITE_SUPERIOR_MUNDO = -1000000;
 const TAMANHO_JOGADOR = 32;
 const VIDAS_INICIAIS = 3;
 const TEMPO_FUGA = 15000;
 const TAMANHO_INIMIGO_TELA = 48;
-const ALTURA_NPC_TELA = 112;
-const LARGURA_NPC_TELA = 72;
+const ALTURA_NPC_TELA = 92;
+const LARGURA_NPC_TELA = 60;
 const VELOCIDADE_INIMIGO = 60;
 const INTERVALO_ANIMACAO_INIMIGO = 250;
 const DISTANCIA_DIALOGO_NPC = 80;
@@ -38,12 +39,17 @@ const LARGURA_ARTE_SUBIDA = 615;
 const ALTURA_ARTE_SUBIDA = 890;
 const LARGURA_ARTE_QUEDA = 600;
 const ALTURA_ARTE_QUEDA = 900;
-const ALTURA_SPRITE_JOGADOR = 112;
+const ALTURA_SPRITE_JOGADOR = 80;
 const LARGURA_ARTE_JOGADOR = 369;
 const ALTURA_ARTE_JOGADOR = 961;
 const LARGURA_ARTE_PARADO_2 = 248;
 const ALTURA_ARTE_PARADO_2 = 612;
 const INTERVALO_ANIMACAO_PARADO = 750;
+const VELOCIDADE_CORRIDA = 320;
+const ACELERACAO_CORRIDA = 1850;
+const INTERVALO_ANIMACAO_CORRIDA_RAPIDA = 88;
+const CAMERA_ANTECIPACAO_MAXIMA = 72;
+const CAMERA_LIMITE_VERTICAL = 30;
 const FASES = window.LEVELS;
 
 const config = {
@@ -76,6 +82,7 @@ function iniciarJogo() {
 let jogador;
 let teclas;
 let plataformas;
+let obstaculos;
 let textoConclusao;
 let iconesVidas = [];
 let textoHUDItens;
@@ -137,6 +144,12 @@ let poseCorridaAtiva = false;
 let tempoAnimacaoCorrida = 0;
 let quadroCorridaAtual = 0;
 let poseNoArAtual = "";
+let textoAvisoSom = null;
+let idAvisoSom = 0;
+
+function tocarEfeito(nome) {
+  if (window.EFEITOS_JOGO) window.EFEITOS_JOGO.tocar(nome);
+}
 
 function preload() {
   // A arte do jogo fica embutida nos arquivos JavaScript de assets.
@@ -167,6 +180,12 @@ function preload() {
   }
   if (typeof TEXTURA_FUNDO_FASE1 !== "undefined") {
     this.load.image("fundo_fase1", TEXTURA_FUNDO_FASE1);
+  }
+  // Data URIs também carregam corretamente ao abrir o jogo via file://.
+  if (window.ASSETS_FASE1_NOVOS) {
+    for (const [chave, dataUri] of Object.entries(window.ASSETS_FASE1_NOVOS)) {
+      this.load.image(chave, dataUri);
+    }
   }
   // Registra as texturas opcionais da Fase 2 sem alterar as imagens da Fase 1.
   if (window.ASSETS_FASE2) {
@@ -275,10 +294,20 @@ function create() {
   quadroCorridaAtual = 0;
   poseNoArAtual = "";
 
-  cena.physics.world.setBounds(0, 0, fase.largura, ALTURA_FASE);
-  cena.cameras.main.setBounds(0, 0, fase.largura, ALTURA_TELA);
-  // Cada fase define seu próprio fundo; sem cor definida, usa o azul da Fase 1.
-  cena.cameras.main.setBackgroundColor(fase.corFundo || '#8ed6ff');
+  // Mantém os limites laterais e o chão, mas deixa espaço amplo para subir.
+  cena.physics.world.setBounds(
+    0, LIMITE_SUPERIOR_MUNDO, fase.largura, ALTURA_FASE - LIMITE_SUPERIOR_MUNDO
+  );
+  cena.cameras.main.setBounds(
+    0, LIMITE_SUPERIOR_MUNDO, fase.largura,
+    ALTURA_TELA + CAMERA_LIMITE_VERTICAL - LIMITE_SUPERIOR_MUNDO
+  );
+  // A Fase 1 mostra mais percurso e aproxima o tamanho visual do avatar adulto.
+  cena.cameras.main.setZoom(fase.id === 1 ? 0.9 : 1);
+  // Evita faixas azuis quando o cenário não cobre alguma borda do enquadramento.
+  cena.cameras.main.setBackgroundColor(
+    fase.corFundo || (fase.id === 1 ? '#111225' : '#8ed6ff')
+  );
 
   // O fundo e a atmosfera especial são aplicados apenas à primeira fase.
   if (fase.id === 1) criarEfeitosFase1(cena, fase);
@@ -289,10 +318,11 @@ function create() {
         fase.largura, ALTURA_TELA, "fundo_fase2")
         .setScrollFactor(0.3, 0).setDepth(-100);
     }
-    // Planta decorativa ao fundo, longe das hitboxes de plataformas e lasers.
-    if (cena.textures.exists("planta_plano")) {
-      cena.add.image(900, 205, "planta_plano")
-        .setDisplaySize(320, 180).setScrollFactor(0.3, 0).setDepth(-90).setAlpha(0.82);
+    // Painéis de segurança e luzes de status dão identidade própria à infiltração.
+    for (let x = 260; x < fase.largura; x += 800) {
+      cena.add.rectangle(x, 116, 4, 232, 0x283b54, 0.82).setScrollFactor(0.3, 0).setDepth(-95);
+      cena.add.rectangle(x + 4, 226, 74, 5, 0x183b4b, 0.9).setScrollFactor(0.3, 0).setDepth(-94);
+      cena.add.rectangle(x + 10, 226, 12, 2, 0x53c5bd, 0.85).setScrollFactor(0.3, 0).setDepth(-93);
     }
   }
 
@@ -317,7 +347,7 @@ function create() {
   jogador.body.setSize(LARGURA_ARTE_JOGADOR * 0.70, ALTURA_ARTE_JOGADOR * 0.90, false);
   jogador.body.setOffset(LARGURA_ARTE_JOGADOR * 0.15, ALTURA_ARTE_JOGADOR * 0.10);
   jogador.body.setCollideWorldBounds(true);
-  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
 
   // Objetos estáticos tornam as plataformas imóveis e compatíveis com colisões Arcade.
   plataformas = cena.physics.add.staticGroup();
@@ -327,13 +357,33 @@ function create() {
       p.largura, p.altura, "tile_plataforma"
     );
     plataformas.add(bloco);
+    if (fase.id === 1 && cena.textures.exists("prateleira_plataforma")) {
+      // Mantém a colisão e usa uma prancha clara, destacada do fundo carregado.
+      bloco.setAlpha(0);
+      const alturaArte = 40;
+      cena.add.image(p.x + p.largura / 2, p.y + 16,
+        "prateleira_plataforma")
+        .setDisplaySize(p.largura + 4, alturaArte).setDepth(2);
+    } else if (fase.id === 2 && cena.textures.exists("plataforma_execucao")) {
+      // Catwalk metálico destacado do corredor; a colisão continua no bloco original.
+      bloco.setAlpha(0);
+      cena.add.image(p.x + p.largura / 2, p.y + 15, "plataforma_execucao")
+        .setDisplaySize(p.largura + 10, 36).setDepth(-1);
+    }
   }
 
   cena.physics.add.collider(jogador, chao);
+  // Plataformas mantêm a colisão sólida original.
   cena.physics.add.collider(jogador, plataformas);
+  criarObstaculos(cena, fase.obstaculos || []);
+  criarEscadasDeCaixas(cena, fase.escadas || []);
+  if (obstaculos) cena.physics.add.collider(jogador, obstaculos);
 
-  // A câmera acompanha o jogador apenas no eixo horizontal.
-  cena.cameras.main.startFollow(jogador, true, LERP_CAMERA, 0);
+  // A câmera acompanha apenas o eixo horizontal; o cenário não oscila nos pulos.
+  cena.cameras.main.setScroll(0, 0);
+  cena.cameras.main.startFollow(
+    jogador, true, LERP_CAMERA, 0, 0, 0
+  );
 
   // A Fase 2 usa sua porta própria; a Fase 1 conserva a porta original.
   if (fase.id === 2) {
@@ -386,6 +436,11 @@ function create() {
     stroke: '#172033', strokeThickness: 3
   }).setScrollFactor(0).setDepth(1000);
   atualizarHUDColetaveis();
+  cena.add.text(20, ALTURA_TELA - 12,
+    fase.id === 2 ? '[Shift] Correr   [M] Som' : '[M] Som',
+    { fontFamily: 'sans-serif', fontSize: '13px', color: '#f3dfb2',
+      stroke: '#172033', strokeThickness: 3 }
+  ).setOrigin(0, 1).setScrollFactor(0).setDepth(1000);
 
   // Estes avisos só aparecem quando há um interruptor correspondente na fase.
   textoDicaInterruptor = cena.add.text(LARGURA_TELA / 2, ALTURA_TELA - 48, '[E] Ativar', {
@@ -416,11 +471,36 @@ function create() {
     d: Phaser.Input.Keyboard.KeyCodes.D,
     espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
     enter: Phaser.Input.Keyboard.KeyCodes.ENTER,
-    e: Phaser.Input.Keyboard.KeyCodes.E
+    e: Phaser.Input.Keyboard.KeyCodes.E,
+    shift: Phaser.Input.Keyboard.KeyCodes.SHIFT,
+    mudo: Phaser.Input.Keyboard.KeyCodes.M
   });
+  if (window.EFEITOS_JOGO) {
+    cena.input.keyboard.once("keydown", window.EFEITOS_JOGO.preparar);
+  }
 }
 
 function update(time, delta) {
+  if (Phaser.Input.Keyboard.JustDown(teclas.mudo)) {
+    const somAtivo = window.EFEITOS_JOGO
+      ? window.EFEITOS_JOGO.alternarSilencio() : false;
+    idAvisoSom++;
+    const idAtual = idAvisoSom;
+    if (textoAvisoSom) textoAvisoSom.destroy();
+    textoAvisoSom = this.add.text(
+      LARGURA_TELA / 2, ALTURA_TELA - 28,
+      somAtivo ? "Sons ativados" : "Sons silenciados",
+      { fontFamily: 'sans-serif', fontSize: '15px', color: '#fff2cc',
+        backgroundColor: '#172033', padding: { x: 10, y: 6 } }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1100);
+    this.time.delayedCall(1400, () => {
+      if (idAtual === idAvisoSom && textoAvisoSom) {
+        textoAvisoSom.destroy();
+        textoAvisoSom = null;
+      }
+    });
+  }
+
   // No Game Over, Enter reinicia esta fase com as três vidas iniciais.
   if (gameOver) {
     if (Phaser.Input.Keyboard.JustDown(teclas.enter)) {
@@ -488,15 +568,22 @@ function update(time, delta) {
     if (centroX <= inimigo.minX && inimigo.direcao < 0) inimigo.direcao = 1;
     else if (centroX >= inimigo.maxX && inimigo.direcao > 0) inimigo.direcao = -1;
     inimigo.sprite.body.setVelocityX(inimigo.direcao * VELOCIDADE_INIMIGO);
+    inimigo.sprite.setFlipX(inimigo.direcao < 0);
 
-    // Quando as duas texturas forem adicionadas, alterna entre elas a cada 250 ms.
-    if (inimigo.temTexturas) {
+    // Alterna os quadros da animação enquanto o inimigo patrulha.
+    if (inimigo.quadros.length > 1) {
       inimigo.tempoAnimacao += delta;
       if (inimigo.tempoAnimacao >= INTERVALO_ANIMACAO_INIMIGO) {
         inimigo.tempoAnimacao -= INTERVALO_ANIMACAO_INIMIGO;
-        inimigo.quadro = 1 - inimigo.quadro;
-        inimigo.sprite.setTexture(inimigo.quadro === 0
-          ? "inimigo_confusao_1" : "inimigo_confusao_2");
+        inimigo.quadro = (inimigo.quadro + 1) % inimigo.quadros.length;
+        inimigo.sprite.setTexture(inimigo.quadros[inimigo.quadro]);
+        if (inimigo.temTexturas) {
+          inimigo.sprite.setDisplaySize(inimigo.larguraVisual, inimigo.alturaVisual);
+          inimigo.sprite.body.setSize(
+            TAMANHO_INIMIGO_TELA / Math.max(0.001, Math.abs(inimigo.sprite.scaleX)),
+            TAMANHO_INIMIGO_TELA / Math.max(0.001, Math.abs(inimigo.sprite.scaleY))
+          );
+        }
       }
     }
   }
@@ -538,11 +625,26 @@ function update(time, delta) {
   const esquerda = teclas.esquerda.isDown || teclas.a.isDown;
   const direita = teclas.direita.isDown || teclas.d.isDown;
   const direcao = esquerda === direita ? 0 : (esquerda ? -1 : 1);
+  const corridaAtiva = faseAtual.id === 2 && teclas.shift.isDown && direcao !== 0;
+  let aceleracaoAtual = corridaAtiva ? ACELERACAO_CORRIDA : ACELERACAO_JOGADOR;
+  const velocidadeXAtual = jogador.body.velocity.x;
+  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
+  if (!corridaAtiva && direcao !== 0 && Math.sign(velocidadeXAtual) === direcao &&
+      Math.abs(velocidadeXAtual) >= VELOCIDADE_JOGADOR) {
+    aceleracaoAtual = 0;
+    if (Math.abs(velocidadeXAtual) > VELOCIDADE_JOGADOR) {
+      const suavidadeFreio = Math.min(1, delta / 120);
+      jogador.body.setVelocityX(Phaser.Math.Linear(
+        velocidadeXAtual, direcao * VELOCIDADE_JOGADOR, suavidadeFreio
+      ));
+    }
+  }
   // A arte aponta para a direita por padrão; espelhamos ao andar para a esquerda.
   if (direcao < 0) jogador.setFlipX(true);
   else if (direcao > 0) jogador.setFlipX(false);
-  jogador.body.setAccelerationX(direcao * ACELERACAO_JOGADOR);
+  jogador.body.setAccelerationX(direcao * aceleracaoAtual);
   jogador.body.setDragX(direcao === 0 ? DESACELERACAO_JOGADOR : 0);
+  this.cameras.main.setFollowOffset(-CAMERA_ANTECIPACAO_MAXIMA, 0);
   if (!noChao) {
     // Seleciona a arte pelo sentido vertical: braço levantado na subida, pose relaxada na queda.
     tempoAnimacaoParado = 0;
@@ -571,7 +673,9 @@ function update(time, delta) {
         aplicarPoseCorrida(quadroCorridaAtual);
       } else {
         tempoAnimacaoCorrida += delta;
-        if (tempoAnimacaoCorrida >= INTERVALO_ANIMACAO_CORRIDA) {
+        const intervaloCorrida = corridaAtiva
+          ? INTERVALO_ANIMACAO_CORRIDA_RAPIDA : INTERVALO_ANIMACAO_CORRIDA;
+        if (tempoAnimacaoCorrida >= intervaloCorrida) {
           tempoAnimacaoCorrida = 0;
           quadroCorridaAtual = (quadroCorridaAtual + 1) % SPRITES_CORRIDA.length;
           aplicarPoseCorrida(quadroCorridaAtual);
@@ -607,6 +711,7 @@ function update(time, delta) {
   // O pulo usa o buffer de entrada e também permite saltar logo após sair da borda.
   if (tempoBufferPuloRestante > 0 && tempoCoyoteRestante > 0) {
     jogador.body.setVelocityY(-FORCA_PULO);
+    tocarEfeito("pulo");
     tempoPuloSegurado = 0;
     tempoBufferPuloRestante = 0;
     tempoCoyoteRestante = 0;
@@ -632,18 +737,30 @@ function update(time, delta) {
 
 // Cria placeholders vermelhos e deixa preparado o uso das duas texturas futuras.
 function criarInimigos(cena, definicoes) {
-  for (const definicao of definicoes) {
+  for (const [indice, definicao] of definicoes.entries()) {
     if (definicao.tipo !== "confusao") continue;
 
-    const temTexturas = cena.textures.exists("inimigo_confusao_1") &&
-                        cena.textures.exists("inimigo_confusao_2");
+    const temaSeguranca = faseAtual.id === 2;
+    const variante = definicao.arte || (temaSeguranca
+      ? (indice % 2 === 0 ? "drone" : "robo")
+      : (indice % 2 === 0 ? "distacao" : "cartoes"));
+    const quadrosNovos = Array.from({ length: 4 }, (_, quadro) => temaSeguranca
+      ? `inimigo_${variante}_f2_${quadro}`
+      : `inimigo_${variante}_${quadro}`);
+    const quadros = quadrosNovos.every((chave) => cena.textures.exists(chave))
+      ? quadrosNovos
+      : ["inimigo_confusao_1", "inimigo_confusao_2"]
+        .filter((chave) => cena.textures.exists(chave));
+    const temTexturas = quadros.length > 0;
     const yVisual = definicao.y - (TAMANHO_INIMIGO_TELA - 32) / 2;
+    const larguraVisual = temaSeguranca ? 54 : 58;
+    const alturaVisual = temaSeguranca ? 48 : 62;
     const sprite = temTexturas
-      ? cena.add.image(definicao.x, yVisual, "inimigo_confusao_1")
+      ? cena.add.image(definicao.x, yVisual, quadros[0])
       : cena.add.rectangle(definicao.x, yVisual,
         TAMANHO_INIMIGO_TELA, TAMANHO_INIMIGO_TELA, 0xe53935);
     if (temTexturas) {
-      sprite.setDisplaySize(TAMANHO_INIMIGO_TELA, TAMANHO_INIMIGO_TELA);
+      sprite.setDisplaySize(larguraVisual, alturaVisual);
     }
     cena.physics.add.existing(sprite);
     // Faz a hitbox acompanhar o novo tamanho visual do inimigo.
@@ -661,6 +778,9 @@ function criarInimigos(cena, definicoes) {
       maxX: definicao.x + metadeAlcance,
       direcao: 1,
       temTexturas,
+      larguraVisual,
+      alturaVisual,
+      quadros,
       tempoAnimacao: 0,
       quadro: 0,
       ativo: true
@@ -676,6 +796,7 @@ function criarInimigos(cena, definicoes) {
       if (caiuSobre) {
         inimigo.ativo = false;
         sprite.destroy();
+        tocarEfeito("dispersao");
         jogador.body.setVelocityY(-FORCA_QUIQUE_INIMIGO);
         // Impede que segurar pulo transforme o pequeno quique em um salto alto.
         tempoPuloSegurado = TEMPO_PULO_VARIAVEL;
@@ -690,7 +811,133 @@ function criarInimigos(cena, definicoes) {
   }
 }
 
-// Gera um fundo provisório por código, adiciona parallax, luzes e névoa vermelha.
+// Estantes altas fazem o papel de obstáculos verticais no percurso.
+function criarObstaculos(cena, definicoes) {
+  obstaculos = cena.physics.add.staticGroup();
+  const temaExecucao = faseAtual.id === 2;
+  const chaveTextura = temaExecucao ? "rack_seguranca_f2" : "estante_obstaculo";
+  if (!cena.textures.exists(chaveTextura)) {
+    const arte = cena.make.graphics({ x: 0, y: 0, add: false });
+    if (temaExecucao) {
+      arte.fillStyle(0x081321, 1).fillRect(0, 0, 64, 96);
+      arte.fillStyle(0x334b5a, 1).fillRect(3, 3, 58, 90);
+      arte.fillStyle(0x74858a, 1).fillRect(5, 4, 54, 4);
+      arte.fillStyle(0x152838, 1).fillRect(8, 12, 48, 74);
+      arte.fillStyle(0x233d4e, 1).fillRect(11, 16, 42, 23);
+      arte.fillStyle(0x091522, 1).fillRect(14, 20, 36, 15);
+      arte.fillStyle(0x49c5bd, 1).fillRect(18, 24, 4, 3);
+      arte.fillStyle(0xeab75b, 1).fillRect(25, 24, 4, 3);
+      arte.fillStyle(0x203849, 1).fillRect(11, 44, 42, 35);
+      for (let y = 48; y < 76; y += 6) {
+        arte.fillStyle(0x657a82, 1).fillRect(15, y, 34, 2);
+      }
+      arte.fillStyle(0xb38c4e, 1).fillRect(4, 87, 56, 4);
+      arte.fillStyle(0x111b28, 1).fillRect(8, 91, 8, 5);
+      arte.fillStyle(0x111b28, 1).fillRect(48, 91, 8, 5);
+      arte.generateTexture(chaveTextura, 64, 96);
+      arte.destroy();
+    } else {
+    arte.fillStyle(0x171321, 1).fillRect(0, 0, 64, 96);
+    arte.fillStyle(0x70404a, 1).fillRect(3, 3, 58, 90);
+    arte.fillStyle(0xc88750, 1).fillRect(4, 4, 5, 88);
+    arte.fillStyle(0x9d5b49, 1).fillRect(55, 4, 5, 88);
+    arte.fillStyle(0x261b2a, 1).fillRect(9, 7, 46, 80);
+    arte.fillStyle(0x211724, 1).fillRect(9, 30, 46, 5);
+    arte.fillStyle(0xe4ae61, 1).fillRect(5, 31, 54, 2);
+    arte.fillStyle(0x211724, 1).fillRect(9, 58, 46, 5);
+    arte.fillStyle(0xe4ae61, 1).fillRect(5, 59, 54, 2);
+    arte.fillStyle(0x211724, 1).fillRect(7, 86, 50, 6);
+    arte.fillStyle(0xe4ae61, 1).fillRect(4, 87, 56, 2);
+
+    const coresLivros = [0x35525a, 0x944e50, 0xc28b4d, 0x54415f, 0xd1b16e, 0x34615b];
+    const linhasLivros = [
+      { y: 8, base: 28, xs: [11, 19, 28, 36, 45, 51], hs: [15, 19, 12, 18, 14, 17] },
+      { y: 36, base: 56, xs: [11, 18, 26, 35, 43, 51], hs: [17, 13, 19, 15, 18, 12] },
+      { y: 64, base: 84, xs: [11, 20, 29, 37, 46, 52], hs: [14, 18, 12, 17, 15, 19] }
+    ];
+    for (const [linha, fila] of linhasLivros.entries()) {
+      fila.xs.forEach((x, indice) => {
+        const h = fila.hs[indice];
+        const w = indice % 2 === 0 ? 6 : 7;
+        const y = fila.base - h;
+        arte.fillStyle(0x130f1a, 1).fillRect(x - 1, y - 1, w + 2, h + 2);
+        arte.fillStyle(coresLivros[(indice + linha * 2) % coresLivros.length], 1)
+          .fillRect(x, y, w, h);
+        arte.fillStyle(0xf0c878, 1).fillRect(x + 1, y + 2, 1, h - 4);
+      });
+    }
+    arte.generateTexture(chaveTextura, 64, 96);
+    arte.destroy();
+    }
+  }
+
+  for (const definicao of definicoes) {
+    const corpo = cena.add.rectangle(definicao.x,
+      ALTURA_CHAO - definicao.altura / 2,
+      definicao.largura, definicao.altura, 0x000000, 0);
+    obstaculos.add(corpo);
+    corpo.setAlpha(0);
+    cena.add.image(definicao.x, ALTURA_CHAO - definicao.altura / 2, chaveTextura)
+      .setDisplaySize(definicao.largura + 8, definicao.altura + 4).setDepth(3);
+  }
+}
+
+// Degraus de caixa: cada pilha sobe uma caixa e deixa vãos curtos para saltar.
+function criarEscadasDeCaixas(cena, definicoes) {
+  const temaExecucao = faseAtual.id === 2;
+  const chaveTextura = temaExecucao ? "case_equipamento_f2" : "caixa_papelao_fechada";
+  if (!cena.textures.exists(chaveTextura)) {
+    const arte = cena.make.graphics({ x: 0, y: 0, add: false });
+    if (temaExecucao) {
+      arte.fillStyle(0x081321, 1).fillRect(0, 0, 48, 36);
+      arte.fillStyle(0x435968, 1).fillRect(3, 4, 42, 29);
+      arte.fillStyle(0x839196, 1).fillRect(5, 5, 38, 4);
+      arte.fillStyle(0x243a49, 1).fillRect(7, 11, 34, 17);
+      arte.fillStyle(0x101d2b, 1).fillRect(18, 13, 12, 4);
+      arte.fillStyle(0x172838, 1).fillRect(20, 14, 8, 2);
+      arte.fillStyle(0xe3b454, 1).fillRect(5, 29, 38, 3);
+      arte.fillStyle(0x182634, 1).fillRect(8, 29, 6, 3);
+      arte.fillStyle(0x182634, 1).fillRect(22, 29, 6, 3);
+      arte.fillStyle(0x182634, 1).fillRect(36, 29, 6, 3);
+      arte.fillStyle(0xa7b1ae, 1).fillRect(3, 8, 3, 5);
+      arte.fillStyle(0xa7b1ae, 1).fillRect(42, 8, 3, 5);
+      arte.generateTexture(chaveTextura, 48, 36);
+      arte.destroy();
+    } else {
+    arte.fillStyle(0x211724, 1).fillRect(0, 0, 48, 36);
+    arte.fillStyle(0xb47c4b, 1).fillRect(3, 7, 42, 26);
+    arte.fillStyle(0xd5a265, 1).fillRect(4, 3, 40, 8);
+    arte.fillStyle(0xefd08b, 1).fillRect(7, 4, 15, 2);
+    arte.fillStyle(0x9a653f, 1).fillRect(24, 4, 16, 3);
+    arte.fillStyle(0x81513b, 1).fillRect(5, 12, 38, 2);
+    arte.fillStyle(0xcf9a5e, 1).fillRect(20, 9, 8, 23);
+    arte.fillStyle(0xefd08b, 1).fillRect(22, 10, 3, 20);
+    arte.fillStyle(0x8c5b40, 1).fillRect(5, 29, 38, 2);
+    arte.fillStyle(0x30202a, 1).fillRect(3, 33, 42, 2);
+    arte.generateTexture(chaveTextura, 48, 36);
+    arte.destroy();
+    }
+  }
+
+  for (const escada of definicoes) {
+    let x = escada.x;
+    const larguraCaixa = escada.larguraCaixa || 42;
+    const alturaCaixa = escada.alturaCaixa || 30;
+    escada.caixasPorDegrau.forEach((quantidade, indiceDegrau) => {
+      for (let nivel = 0; nivel < quantidade; nivel++) {
+        const y = ALTURA_CHAO - alturaCaixa * (nivel + 0.5);
+        const corpo = cena.add.rectangle(x, y, larguraCaixa, alturaCaixa, 0x000000, 0);
+        obstaculos.add(corpo);
+        corpo.setAlpha(0);
+        cena.add.image(x, y, chaveTextura)
+          .setDisplaySize(larguraCaixa + 2, alturaCaixa + 2).setDepth(3);
+      }
+      x += larguraCaixa + (escada.gaps[indiceDegrau] ?? 8);
+    });
+  }
+}
+
+// Gera um fundo provisório por código, adiciona parallax, luzes e névoa âmbar.
 function criarEfeitosFase1(cena, fase) {
   const chavePlaceholder = "fundo_fase1_placeholder";
   if (!cena.textures.exists("fundo_fase1")) {
@@ -703,11 +950,22 @@ function criarEfeitosFase1(cena, fase) {
     }
   }
 
-  const chaveFundo = cena.textures.exists("fundo_fase1")
-    ? "fundo_fase1" : chavePlaceholder;
-  cena.add.tileSprite(fase.largura / 2, ALTURA_TELA / 2,
-    fase.largura, ALTURA_TELA, chaveFundo)
-    .setScrollFactor(0.3, 0).setDepth(-100);
+  const chaveBiblioteca = "fundo_fase1_biblioteca";
+  if (cena.textures.exists(chaveBiblioteca)) {
+    // Repete o cenário sem mesas ao longo do percurso para manter a leitura limpa.
+    for (let painel = 0; painel < Math.ceil(fase.largura / LARGURA_TELA); painel++) {
+      cena.add.image(painel * LARGURA_TELA + LARGURA_TELA / 2,
+        ALTURA_TELA / 2, chaveBiblioteca)
+        .setDisplaySize(LARGURA_TELA, ALTURA_TELA)
+        .setScrollFactor(1, 0).setDepth(-100);
+    }
+  } else {
+    const chaveFundo = cena.textures.exists("fundo_fase1")
+      ? "fundo_fase1" : chavePlaceholder;
+    cena.add.tileSprite(fase.largura / 2, ALTURA_TELA / 2,
+      fase.largura, ALTURA_TELA, chaveFundo)
+      .setScrollFactor(0.3, 0).setDepth(-100);
+  }
 
   // Oscila o alpha em intervalos aleatórios; algumas piscadas ficam mais fortes.
   const overlayEscuro = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
@@ -731,11 +989,11 @@ function criarEfeitosFase1(cena, fase) {
   agendarPisca();
 
   // A faixa é mais larga que a tela para se mover sem revelar as bordas.
-  const nevoaVermelha = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 42,
-    LARGURA_TELA + 100, 110, 0xb92e42, 0.22)
+  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 42,
+    LARGURA_TELA + 100, 110, 0xc8873a, 0.22)
     .setScrollFactor(0).setDepth(60);
   cena.tweens.add({
-    targets: nevoaVermelha,
+    targets: nevoaAmbar,
     x: LARGURA_TELA / 2 + 34,
     duration: 4200,
     ease: 'Sine.easeInOut',
@@ -765,6 +1023,7 @@ function criarCheckpoints(cena, definicoes) {
         x: definicao.x,
         y: ALTURA_CHAO - ALTURA_SPRITE_JOGADOR / 2
       };
+      tocarEfeito("checkpoint");
       mostrarProgressoSalvo(cena);
     });
   });
@@ -775,21 +1034,33 @@ function criarLasers(cena, definicoes) {
   for (const definicao of definicoes) {
     if (!definicao.id || !["intermitente", "movel", "fixo"].includes(definicao.tipo)) continue;
 
-    const laser = cena.add.rectangle(
-      definicao.x,
-      definicao.y,
-      definicao.largura,
-      definicao.altura,
-      definicao.tipo === "intermitente" ? 0x5e2332 : 0xff3b55
-    ).setDepth(8);
+    // Hitbox invisível separada da arte fina: o feixe fica legível sem parecer um bloco.
+    const laser = cena.add.rectangle(definicao.x, definicao.y,
+      definicao.largura, definicao.altura, 0xff365b, 0).setDepth(8);
     cena.physics.add.existing(laser);
     laser.body.setAllowGravity(false);
     laser.body.setImmovable(true);
-    laser.body.setSize(definicao.largura, definicao.altura);
+    const horizontal = definicao.largura >= definicao.altura;
+    // Mantém uma pequena margem de contato em volta do traço, sem a antiga barra grossa.
+    laser.body.setSize(
+      horizontal ? definicao.largura : Math.min(definicao.largura, 6),
+      horizontal ? Math.min(definicao.altura, 6) : definicao.altura
+    );
+    const brilho = cena.add.rectangle(definicao.x, definicao.y,
+      horizontal ? definicao.largura : 8, horizontal ? 8 : definicao.altura,
+      0xff315c, 0.16).setDepth(8);
+    const feixe = cena.add.rectangle(definicao.x, definicao.y,
+      horizontal ? definicao.largura : 2, horizontal ? 2 : definicao.altura,
+      0xffa3c2, 0.95).setDepth(8.1);
+    const pulso = cena.add.rectangle(definicao.x, definicao.y,
+      horizontal ? 14 : 5, horizontal ? 5 : 14, 0xffeff7, 0.92).setDepth(8.2);
 
     const estado = {
       id: definicao.id,
       sprite: laser,
+      brilho,
+      feixe,
+      pulso,
       definicao,
       ligado: definicao.tipo !== "intermitente",
       direcao: 1,
@@ -812,7 +1083,7 @@ function criarLasers(cena, definicoes) {
           { x: definicao.x, y: definicao.y + definicao.altura / 2 }
         ];
       estado.emissores = pontos.map((ponto) =>
-        cena.add.image(ponto.x, ponto.y, "emissor_laser").setDisplaySize(16, 16).setDepth(9)
+        cena.add.image(ponto.x, ponto.y, "emissor_laser").setDisplaySize(20, 20).setDepth(9)
       );
     }
     lasers.push(estado);
@@ -886,6 +1157,15 @@ function atualizarLasers(agora) {
         estado.emissores[1].setPosition(estado.sprite.x, estado.sprite.y + definicao.altura / 2);
       }
     }
+    estado.brilho.setPosition(estado.sprite.x, estado.sprite.y);
+    estado.feixe.setPosition(estado.sprite.x, estado.sprite.y);
+    const limiteBrilho = Math.max(0, (definicao.largura >= definicao.altura
+      ? definicao.largura : definicao.altura) / 2 - 8);
+    const deslocamentoBrilho = Math.sin(agora / 240) * limiteBrilho;
+    estado.pulso.setPosition(
+      estado.sprite.x + (definicao.largura >= definicao.altura ? deslocamentoBrilho : 0),
+      estado.sprite.y + (definicao.largura < definicao.altura ? deslocamentoBrilho : 0)
+    );
   }
 
   // Também atualiza a colisão durante o aviso piscante do interruptor.
@@ -909,8 +1189,17 @@ function atualizarVisualLaser(estado, agora) {
   }
 
   estado.sprite.body.enable = ligado;
-  estado.sprite.setFillStyle(ligado ? 0xff3b55 : 0x5e2332);
-  estado.sprite.setAlpha(ligado ? 1 : 0.75);
+  estado.brilho.setVisible(ligado);
+  estado.feixe.setVisible(ligado);
+  estado.pulso.setVisible(ligado);
+  estado.emissores.forEach((emissor) => emissor.setAlpha(ligado ? 1 : 0.58));
+  if (ligado) {
+    const oscilacao = 0.55 + (Math.sin(agora / 95) + 1) * 0.2;
+    estado.brilho.setAlpha(oscilacao * 0.3);
+    estado.feixe.setAlpha(0.72 + oscilacao * 0.28);
+    estado.pulso.setAlpha(0.55 + oscilacao * 0.45);
+    estado.pulso.setScale(0.75 + (Math.sin(agora / 140) + 1) * 0.2);
+  }
 }
 
 // Cria o interruptor ilustrado; se a textura faltar, conserva o placeholder.
@@ -955,6 +1244,7 @@ function ativarInterruptor(interruptor, agora) {
   interruptor.desligaAte = agora + duracao;
   interruptor.reativarApos = interruptor.desligaAte + 1000;
   atualizarVisualInterruptor(interruptor, true);
+  tocarEfeito("interruptor");
 
   const idsDesligados = new Set(definicao.desliga || []);
   for (const laser of lasers) {
@@ -1005,15 +1295,25 @@ function atualizarInterruptores(cena, agora) {
 
 // Cria o cofre fechado e abre sua hitbox ao toque para iniciar a coleta automática.
 function criarCofre(cena, definicao) {
-  const cofre = cena.add.rectangle(
-    definicao.x, definicao.y, 64, 64, 0x343943
-  ).setDepth(7);
+  if (cena.textures.exists("suporte_projeto")) {
+    cena.add.image(definicao.x, ALTURA_CHAO - 33, "suporte_projeto")
+      .setDisplaySize(142, 66).setDepth(6);
+  }
+  const cofre = cena.add.rectangle(definicao.x, ALTURA_CHAO - 40,
+    76, 78, 0x343943, 0).setDepth(7);
+  cofre.setAlpha(0);
+  const arteCofre = cena.textures.exists("cofre_projeto")
+    ? cena.add.image(definicao.x, ALTURA_CHAO - 72, "cofre_projeto")
+      .setDisplaySize(82, 66).setDepth(7.1)
+    : cofre;
   cena.physics.add.existing(cofre, true);
 
   cena.physics.add.overlap(jogador, cofre, () => {
     if (cofreAberto) return;
     cofreAberto = true;
-    cofre.setFillStyle(0x858b96);
+    if (arteCofre !== cofre && cena.textures.exists("cofre_projeto_aberto")) {
+      arteCofre.setTexture("cofre_projeto_aberto");
+    }
     mostrarProjeto(cena, definicao);
   });
 }
@@ -1021,9 +1321,15 @@ function criarCofre(cena, definicao) {
 // Exibe o projeto dourado com brilho por um instante e então o coleta sozinho.
 function mostrarProjeto(cena, cofre) {
   const x = cofre.x;
-  const y = cofre.y - 54;
+  const y = cofre.y - 78;
   const brilho = cena.add.ellipse(x, y, 46, 48, 0xffc928, 0.32).setDepth(10);
-  const projeto = cena.add.rectangle(x, y, 24, 28, 0xffc928).setDepth(11);
+  const projeto = cena.textures.exists("projeto_recuperado")
+    ? cena.add.image(x, y, "projeto_recuperado").setDisplaySize(44, 48).setDepth(11)
+    : cena.add.rectangle(x, y, 24, 28, 0xffc928).setDepth(11);
+  cena.tweens.add({
+    targets: projeto, y: y - 8, angle: { from: -4, to: 4 },
+    duration: 360, yoyo: true, repeat: -1, ease: "Sine.easeInOut"
+  });
   cena.tweens.add({
     targets: brilho,
     alpha: 0.55,
@@ -1047,6 +1353,7 @@ function mostrarProjeto(cena, cofre) {
 function coletarProjeto(cena, cofre) {
   if (projetoColetado) return;
   projetoColetado = true;
+  tocarEfeito("projeto");
   textoHUDProjeto.setText('Projeto: ✔').setColor('#a9ff9f');
   ultimoCheckpoint = {
     // Reaparece junto ao cofre, sem ficar preso dentro do retângulo.
@@ -1185,9 +1492,11 @@ function criarColetaveis(cena, definicoes) {
 
       if (item.tipo === "duvida") {
         duvidasColetadas++;
+        tocarEfeito("pista");
         mostrarDica(cena);
       } else {
         crachasColetados++;
+        tocarEfeito("acesso");
       }
       atualizarHUDColetaveis();
     });
@@ -1222,8 +1531,10 @@ function mostrarDica(cena) {
 
 // Atualiza os dois contadores de itens, mantendo o texto preso à tela.
 function atualizarHUDColetaveis() {
+  const rotuloPistas = faseAtual.id === 1 ? "Pistas" : "Dúvidas";
+  const rotuloAcessos = faseAtual.id === 1 ? "Acessos" : "Crachás";
   textoHUDItens.setText(
-    `Dúvidas: ${duvidasColetadas}/${totalDuvidasFase}   Crachás: ${crachasColetados}`
+    `${rotuloPistas}: ${duvidasColetadas}/${totalDuvidasFase}   ${rotuloAcessos}: ${crachasColetados}`
   );
 }
 
@@ -1237,6 +1548,7 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
   if (gameOver || concluiu || tempoInvencibilidade > 0) return false;
 
   vidasRestantes = Math.max(0, vidasRestantes - 1);
+  tocarEfeito(vidasRestantes === 0 ? "gameover" : "dano");
   atualizarHUDVidas();
   tempoInvencibilidade = DURACAO_INVENCIBILIDADE_MS;
   tempoPiscarInvencibilidade = 0;
@@ -1278,7 +1590,7 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
   }
   jogador.body.setAcceleration(0, 0);
   jogador.body.setGravityY(0);
-  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
   poseNoArAtual = '';
   poseCorridaAtiva = false;
   quadroParadoDois = false;
@@ -1291,6 +1603,7 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
 function concluirFase(cena) {
   if (concluiu) return;
   concluiu = true;
+  tocarEfeito("vitoria");
   painelLicaoAtivo = true;
   jogador.body.setVelocity(0, 0);
   jogador.body.setAcceleration(0, 0);

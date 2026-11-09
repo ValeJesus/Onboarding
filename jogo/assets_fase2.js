@@ -12,3 +12,138 @@ window.ASSETS_FASE2 = {
   porta_saida: 'data:image/png;base64,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'
 };
 window.ASSETS_FASE2.npc_ti_2 = window.ASSETS_FASE2.npc_ti_1;
+
+// Arte original embutida para abrir a fase diretamente em file://.
+// Corredor corporativo noturno com painéis de vidro, armários técnicos e luzes de segurança.
+window.ASSETS_FASE2.fundo_fase2 = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" shape-rendering="crispEdges">
+<rect width="800" height="450" fill="#11182b"/>
+<rect y="12" width="800" height="18" fill="#25334a"/><rect y="31" width="800" height="5" fill="#080e1c"/>
+<rect x="0" y="38" width="800" height="294" fill="#18243a"/>
+<path d="M0 42h800v9H0zM0 323h800v12H0z" fill="#293c55"/>
+<path d="M0 51h800v5H0zM0 335h800v5H0z" fill="#0b1221"/>
+<g fill="#0b1324" stroke="#33445d" stroke-width="5">
+<rect x="26" y="67" width="220" height="237"/><rect x="279" y="67" width="220" height="237"/><rect x="532" y="67" width="220" height="237"/>
+</g>
+<g fill="#16263c" stroke="#40546d" stroke-width="3">
+<rect x="34" y="75" width="204" height="221"/><rect x="287" y="75" width="204" height="221"/><rect x="540" y="75" width="204" height="221"/>
+</g>
+<g fill="#15263f">
+<path d="M42 84h87v204H42zM141 84h88v204h-88zM295 84h88v204h-88zM394 84h88v204h-88zM548 84h88v204h-88zM647 84h88v204h-88z"/>
+</g>
+<g fill="#21354f" opacity=".72"><path d="M50 91h70v8H50zM303 91h70v8h-70zM556 91h70v8h-70z"/></g>
+<g fill="#0a1221" opacity=".8">
+<rect x="54" y="169" width="44" height="111"/><rect x="102" y="186" width="32" height="94"/><rect x="154" y="177" width="55" height="103"/>
+<rect x="305" y="181" width="45" height="99"/><rect x="357" y="162" width="36" height="118"/><rect x="414" y="190" width="57" height="90"/>
+<rect x="557" y="167" width="53" height="113"/><rect x="617" y="186" width="34" height="94"/><rect x="667" y="174" width="56" height="106"/>
+</g>
+<g fill="#28384c"><path d="M0 350h800v20H0zM0 393h800v57H0z"/><path d="M0 371h800v8H0z" fill="#101827"/></g>
+<g fill="#34465b"><path d="M0 346h800v4H0zM0 390h800v4H0z"/></g>
+<g fill="#101827" stroke="#34465a" stroke-width="3">
+<rect x="63" y="302" width="118" height="43"/><rect x="319" y="302" width="160" height="43"/><rect x="575" y="302" width="136" height="43"/>
+</g>
+<g fill="#253b50"><rect x="76" y="310" width="90" height="7"/><rect x="332" y="310" width="132" height="7"/><rect x="588" y="310" width="108" height="7"/></g>
+<g fill="#55c8c1"><rect x="81" y="312" width="8" height="3"/><rect x="337" y="312" width="8" height="3"/><rect x="593" y="312" width="8" height="3"/></g>
+<g fill="#f0aa57"><rect x="226" y="116" width="8" height="18"/><rect x="479" y="116" width="8" height="18"/><rect x="733" y="116" width="8" height="18"/></g>
+<g fill="#d65c65" opacity=".82"><rect x="226" y="116" width="8" height="4"/><rect x="479" y="116" width="8" height="4"/><rect x="733" y="116" width="8" height="4"/></g>
+<path d="M0 434h800v16H0z" fill="#0a101d"/><path d="M20 435h80m30 0h80m30 0h80m30 0h80m30 0h80m30 0h80m30 0h80" stroke="#35455b" stroke-width="2"/>
+</svg>`);
+
+// Passarela estreita de metal, com faixa de segurança e suportes visíveis.
+window.ASSETS_FASE2.plataforma_execucao = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="36" viewBox="0 0 180 36" shape-rendering="crispEdges">
+<path d="M5 9h170v6H5z" fill="#b5c4cc"/><path d="M2 15h176v10H2z" fill="#354b5a" stroke="#0a1422" stroke-width="3"/>
+<path d="M8 17h164v3H8z" fill="#627b87"/><path d="M12 22h18v2H12zm29 0h18v2H41zm29 0h18v2H70zm29 0h18v2H99zm29 0h18v2h-18zm29 0h10v2h-10z" fill="#182b3b"/>
+<path d="M13 25v8h7v-8m139 0v8h7v-8" fill="#61727a" stroke="#0a1422" stroke-width="2"/>
+<path d="M8 10h16v4H8zm28 0h16v4H36zm28 0h16v4H64zm28 0h16v4H92zm28 0h16v4h-16zm28 0h16v4h-16z" fill="#e7b957"/>
+<path d="M8 10h7v4H8zm28 0h7v4h-7zm28 0h7v4h-7zm28 0h7v4h-7zm28 0h7v4h-7zm28 0h7v4h-7z" fill="#273b49"/>
+<path d="M3 31h174v3H3z" fill="#101a27"/>
+</svg>`);
+
+// Emissor compacto em aço grafite; o feixe faz o brilho animado em tempo real.
+window.ASSETS_FASE2.emissor_laser = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" shape-rendering="crispEdges">
+<path d="M5 2h14v4h3v12h-3v4H5v-4H2V6h3z" fill="#0a1220"/><path d="M6 4h12v3h3v10h-3v3H6v-3H3V7h3z" fill="#657b8a"/>
+<path d="M7 7h10v10H7z" fill="#1b2d3c"/><path d="M9 9h6v6H9z" fill="#ff4770"/><path d="M10 10h4v4h-4z" fill="#ffd4e1"/>
+<path d="M4 8h2v8H4zm14 0h2v8h-2z" fill="#a9bac0"/>
+</svg>`);
+
+// Cofre em aço escuro, sua versão aberta, pedestal de segurança e pasta do projeto.
+window.ASSETS_FASE2.suporte_projeto = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="142" height="72" viewBox="0 0 142 72" shape-rendering="crispEdges">
+<path d="M8 17h126v10H8z" fill="#0a1421"/><path d="M12 14h118v10H12z" fill="#899a9b"/>
+<path d="M18 24h106v33h-8V31H26v26h-8z" fill="#354b59" stroke="#0a1421" stroke-width="4"/>
+<path d="M27 31h88v6H27zM27 48h88v5H27z" fill="#203543"/><path d="M18 57h106v7H18z" fill="#172733"/>
+<path d="M8 64h126v5H8z" fill="#0a1421"/><path d="M13 17h12v3H13zm104 0h12v3h-12z" fill="#e0b75f"/>
+<path d="M36 38h70v6H36z" fill="#617681"/><path d="M45 40h52v2H45z" fill="#a5b5b1"/>
+</svg>`);
+
+window.ASSETS_FASE2.cofre_projeto = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="80" viewBox="0 0 96 80" shape-rendering="crispEdges">
+<path d="M12 8h72v9h7v51h-7v7H12v-7H5V17h7z" fill="#07111e"/>
+<path d="M15 11h66v7h6v45h-6v7H15v-7H9V18h6z" fill="#425867"/>
+<path d="M18 20h60v39H18z" fill="#243a49" stroke="#a9844c" stroke-width="3"/>
+<path d="M23 24h50v31H23z" fill="#172a39"/><path d="M27 28h42v23H27z" fill="#304b59"/>
+<path d="M42 32h12v15H42z" fill="#c59e54"/><path d="M45 35h6v9h-6z" fill="#101c2a"/>
+<path d="M10 21h8v36h-8zM78 21h8v36h-8z" fill="#75878b"/>
+<path d="M18 62h60v5H18z" fill="#d0a654"/><path d="M24 13h48v3H24z" fill="#aeb9b2"/>
+<path d="M21 72h10v5H21zm44 0h10v5H65z" fill="#111c27"/>
+</svg>`);
+
+window.ASSETS_FASE2.cofre_projeto_aberto = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="80" viewBox="0 0 96 80" shape-rendering="crispEdges">
+<path d="M12 31h72v9h7v27h-7v7H12v-7H5V40h7z" fill="#07111e"/>
+<path d="M15 34h66v7h6v20h-6v7H15v-7H9V41h6z" fill="#425867"/>
+<path d="M18 43h60v14H18z" fill="#243a49" stroke="#a9844c" stroke-width="3"/>
+<path d="M23 46h50v8H23z" fill="#172a39"/><path d="M42 45h12v10H42z" fill="#e6bc62"/>
+<path d="M20 12h58v7h8v9h-8v5H20v-5h-8v-9h8z" fill="#07111e"/>
+<path d="M23 15h52v6h7v4h-7v4H23v-4h-7v-4h7z" fill="#687c84" stroke="#a9844c" stroke-width="2"/>
+<path d="M28 18h42v4H28z" fill="#9ca9a4"/><path d="M44 26h12v3H44z" fill="#d0a654"/>
+<path d="M21 69h10v5H21zm44 0h10v5H65z" fill="#111c27"/>
+</svg>`);
+
+window.ASSETS_FASE2.projeto_recuperado = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" shape-rendering="crispEdges">
+<path d="M12 5h22l9 9v27H12z" fill="#081421"/><path d="M15 7h18l7 8v23H15z" fill="#7e9aa0"/>
+<path d="M19 11h13v4H19zm0 8h17v2H19zm0 5h17v2H19zm0 5h12v2H19z" fill="#d7dfcf"/>
+<path d="M33 8v8h7" fill="#c6d2c8"/><path d="M10 13h7v29h-7z" fill="#bd9250"/>
+<path d="M7 17h10v5H7zm0 16h10v5H7z" fill="#e0bc68"/>
+<path d="M25 34h9v6h-9z" fill="#263c4b"/><path d="M27 36h5v2h-5z" fill="#5dd0c4"/>
+</svg>`);
+
+// Inimigos próprios da infiltração: drones de observação e robôs de patrulha.
+const svgInimigoFase2 = (desenho) =>
+  "data:image/svg+xml;charset=utf-8," + encodeURIComponent(desenho);
+for (let quadro = 0; quadro < 4; quadro++) {
+  const luz = quadro % 2 === 0 ? "#ff496b" : "#ffb85c";
+  const rotor = quadro % 2 === 0 ? 0 : 3;
+  window.ASSETS_FASE2[`inimigo_drone_f2_${quadro}`] = svgInimigoFase2(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="56" viewBox="0 0 64 56" shape-rendering="crispEdges">
+  <path d="M5 12h12v5h8v-5h14v5h8v-5h12v8h-8v8H43v8H21v-8H13v-8H5z" fill="#07111e"/>
+  <path d="M7 14h10v5h8v-4h14v4h8v-5h10v4h-7v6H14v-6H7z" fill="#536b78"/>
+  <path d="M3 ${7+rotor}h16v4H3zm42 0h16v4H45z" fill="#aab8b4"/>
+  <path d="M5 5h10v2H5zm44 0h10v2H49z" fill="#223a4a"/>
+  <path d="M20 15h24v19H20z" fill="#0a1421"/><path d="M23 13h18v20H23z" fill="#71858b"/>
+  <path d="M25 16h14v6H25z" fill="#314958"/><path d="M27 25h10v8H27z" fill="#101d2b"/>
+  <path d="M29 27h6v5h-6z" fill="${luz}"/><path d="M30 28h3v2h-3z" fill="#fff0db"/>
+  <path d="M20 34h24v5H20z" fill="#bd9851"/><path d="M25 39h14v4H25z" fill="#182a38"/>
+  <path d="M8 24h6v4H8zm42 0h6v4h-6z" fill="#37c4bc"/>
+  <path d="M3 19h5v7H3zm53 0h5v7h-5z" fill="#263e4e"/>
+  </svg>`);
+
+  const rodaEsquerda = quadro % 2 === 0 ? 0 : 2;
+  const rodaDireita = quadro % 2 === 0 ? 2 : 0;
+  window.ASSETS_FASE2[`inimigo_robo_f2_${quadro}`] = svgInimigoFase2(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" shape-rendering="crispEdges">
+  <path d="M18 4h20v5h6v17h-5v5H17v-5h-5V9h6z" fill="#07111e"/>
+  <path d="M20 7h16v3h5v14h-5v4H20v-4h-5V10h5z" fill="#70838a"/>
+  <path d="M21 12h14v8H21z" fill="#213746"/><path d="M24 14h8v4h-8z" fill="${luz}"/>
+  <path d="M26 15h4v2h-4z" fill="#ffe6cf"/><path d="M11 15h4v7h-4zm30 0h4v7h-4z" fill="#364e5d"/>
+  <path d="M17 27h22v12H17z" fill="#243b4b" stroke="#07111e" stroke-width="3"/>
+  <path d="M21 30h14v4H21z" fill="#3cc0b8"/><path d="M24 31h8v2h-8z" fill="#c6e6d8"/>
+  <path d="M13 37h30v5H13z" fill="#d2a955"/><path d="M10 40h36v7H10z" fill="#101c29"/>
+  <path d="M12 ${44+rodaEsquerda}h10v8H12zm22 ${44+rodaDireita}h10v8H34z" fill="#050d16"/>
+  <path d="M14 ${46+rodaEsquerda}h5v3h-5zm22 ${46+rodaDireita}h5v3h-5z" fill="#687f87"/>
+  <path d="M26 2h4v5h-4z" fill="#9ba9a7"/><path d="M27 0h2v3h-2z" fill="${luz}"/>
+  </svg>`);
+}
