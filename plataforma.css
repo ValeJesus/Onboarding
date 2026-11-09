@@ -1,0 +1,68 @@
+/* Login, usuário na top-bar, aba do jogo e painel do supervisor */
+.user-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 10.5px; font-weight: 600; }
+.user-chip .av { width: 22px; height: 22px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-size: 9.5px; font-weight: 700; }
+.user-chip small { color: var(--muted); font-weight: 500; }
+@media (max-width: 560px) { .user-chip span.nm, .user-chip small { display: none; } .user-chip { padding: 2px; } }
+.btn-ghost.sm { padding: 4px 11px; font-size: 10.5px; display: inline-flex; align-items: center; gap: 5px; }
+
+/* aba do jogo: usa mais largura que o resto da página, sem tirar a top-bar */
+.game-card { padding: 14px; width: min(96vw, 960px); position: relative; left: 50%; transform: translateX(-50%); }
+.game-card .card-h { align-items: center; }
+.game-box { aspect-ratio: 16 / 9; background: #172033; border-radius: 14px; overflow: hidden; }
+.game-box iframe { width: 100%; height: 100%; border: 0; display: block; }
+.game-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.game-help { margin-top: 10px; font-size: 10px; color: var(--muted); text-align: center; }
+
+/* login */
+.login-page { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+.login { width: min(100%, 360px); padding: 26px 22px; }
+.login .brand { justify-content: center; margin-bottom: 18px; }
+.login h1 { font-size: 16px; text-align: center; }
+.login .sub { text-align: center; color: var(--muted); font-size: 11px; margin: 2px 0 16px; }
+.login label { display: block; font-size: 10.5px; font-weight: 600; margin-bottom: 10px; }
+.login input { width: 100%; margin-top: 4px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 12px; }
+.login input:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+.login .btn-primary { width: 100%; justify-content: center; padding: 10px; margin-top: 4px; }
+.login .erro { color: var(--red); background: var(--red-soft); border-radius: 10px; padding: 7px 10px; font-size: 10.5px; margin-bottom: 10px; }
+.demo { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 10px; color: var(--muted); }
+.demo button { display: flex; width: 100%; justify-content: space-between; margin-top: 6px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 10.5px; }
+.demo button:hover { border-color: var(--brand); }
+
+/* supervisor */
+.sup-wrap { width: min(100% - 32px, 860px); margin-inline: auto; padding: 20px 0 60px; }
+.sup-head { padding: 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.sup-head .av { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.sup-head .info { flex: 1; min-width: 180px; }
+.sup-head h2 { font-size: 14px; }
+.sup-head small { color: var(--muted); font-size: 10.5px; }
+.sup-bar { height: 8px; margin: 8px 0 4px; background: #e6e1fb; border-radius: 8px; }
+.sup-bar i { display: block; height: 100%; background: var(--brand); border-radius: 8px; transition: width .4s; }
+.st-nao { background: var(--amber-soft); color: var(--amber); } .st-and { background: var(--blue-soft); color: var(--blue); } .st-ok { background: var(--green-soft); color: var(--green); }
+.sup-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-bottom: 14px; }
+@media (min-width: 640px) { .sup-grid { grid-template-columns: 1fr 1fr; } }
+.fase-card { padding: 16px; }
+.fase-card h3 { font-size: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.mrow { margin-bottom: 10px; font-size: 10.5px; }
+.mrow > div { display: flex; justify-content: space-between; margin-bottom: 3px; color: #55566a; }
+.mrow .bar { margin: 0; height: 6px; }
+.fase-card .foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.fase-card.vazia { color: var(--muted); text-align: center; padding: 28px 16px; font-size: 11px; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 11px; }
+.timeline li:last-child { border: 0; }
+.timeline time { color: var(--muted); font-size: 9.5px; min-width: 86px; }
+
+.sel-colab { display: grid; gap: 10px; grid-template-columns: 1fr; margin-bottom: 14px; }
+@media (min-width: 560px) { .sel-colab { grid-template-columns: 1fr 1fr; } }
+.colab-btn { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.colab-btn .av { width: 34px; height: 34px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+.colab-btn b { display: block; font-size: 11.5px; } .colab-btn small { color: var(--muted); font-size: 9.5px; }
+.colab-btn.on { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.tabs.sup { margin-top: 0; }
+.filtros { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.pill.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+.filtros .pill { cursor: pointer; }
+.timeline li.tarefa { display: block; }
+.tarefa h4 { margin: 0; font-size: 11.5px; } .tarefa.feita h4 { text-decoration: line-through; color: var(--muted); }
+.tarefa p { color: var(--muted); font-size: 10.5px; margin: 2px 0 6px; }
+.tarefa .tags { display: flex; gap: 5px; flex-wrap: wrap; }

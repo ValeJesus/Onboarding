@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Gerenciador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="plataforma.css">
+  <script src="plataforma.js"></script>
+  <script>{ const s = Auth.sessao(); if (s) location.replace(Auth.destino(s.papel)); }</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+</defs></svg>
+<main class="login-page">
+  <form class="card login" id="form" autocomplete="on">
+    <div class="brand"><span class="brand-logo"><svg class="ico"><use href="#i-layers"/></svg></span><span><strong>Gerenciador</strong><small>Onboarding</small></span></div>
+    <h1>Bem-vindo de volta</h1>
+    <p class="sub">Entre com seu usuário para continuar</p>
+    <div class="erro" id="erro" hidden>Usuário ou senha incorretos.</div>
+    <label>Usuário<input id="usuario" autocomplete="username" required autofocus></label>
+    <label>Senha<input id="senha" type="password" autocomplete="current-password" required></label>
+    <button class="btn-primary" type="submit">Entrar</button>
+    <div class="demo">Contas de demonstração (clique para preencher):
+      <button type="button" data-u="colaborador" data-s="colab123"><b>Colaborador 1</b><span>colaborador / colab123</span></button>
+      <button type="button" data-u="colaborador2" data-s="colab456"><b>Colaboradora 2</b><span>colaborador2 / colab456</span></button>
+      <button type="button" data-u="supervisor" data-s="super123"><b>Supervisor</b><span>supervisor / super123</span></button>
+    </div>
+  </form>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  document.querySelectorAll('.demo button').forEach((b) => b.addEventListener('click', () => {
+    $('usuario').value = b.dataset.u; $('senha').value = b.dataset.s; $('senha').focus();
+  }));
+  $('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const s = Auth.entrar($('usuario').value, $('senha').value);
+    if (!s) { $('erro').hidden = false; return; }
+    location.href = Auth.destino(s.papel);
+  });
+</script>
+</body>
+</html>

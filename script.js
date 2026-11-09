@@ -11,7 +11,8 @@ const COR_CAT    = { trabalho: '#55555f', pessoal: '#5b34f5', ideia: '#e09400', 
 const PROXIMO    = { pendente: 'ativo', ativo: 'concluido', concluido: 'pendente' };
 const ICONE_ST   = { pendente: 'clock', ativo: 'circle', concluido: 'check' };
 const DIA = 24 * 60 * 60 * 1000;
-const CHAVE = 'gerenciador-itens-v1';
+const USUARIO_ATUAL = (Auth.sessao() || {}).usuario || 'colaborador';
+const CHAVE = Tarefas.chave(USUARIO_ATUAL);
 
 const $ = (id) => document.getElementById(id);
 const ico = (nome) => `<svg class="ico"><use href="#i-${nome}"/></svg>`;
@@ -19,22 +20,8 @@ const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const norm = (t) => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /* ---------- dados ---------- */
-function exemplos() {
-  const agora = Date.now();
-  return [
-    { id: 1, titulo: 'Reunião com cliente', descricao: 'Apresentação da proposta de marketing digital', status: 'pendente',  prioridade: 'urgente', categoria: 'trabalho', criado: agora },
-    { id: 2, titulo: 'Estudar TypeScript',  descricao: 'Completar o módulo avançado de tipos genéricos', status: 'ativo',     prioridade: 'media',   categoria: 'estudo',   criado: agora - 1 * DIA },
-    { id: 3, titulo: 'Backup do servidor',  descricao: 'Realizar backup completo dos dados de produção', status: 'concluido', prioridade: 'alta',    categoria: 'trabalho', criado: agora - 2 * DIA },
-    { id: 4, titulo: 'Lista de compras',    descricao: 'Itens para o escritório: cadernos, canetas, post-its', status: 'pendente', prioridade: 'baixa', categoria: 'pessoal', criado: agora - 3 * DIA }
-  ];
-}
-
 function carregar() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem(CHAVE));
-    if (Array.isArray(salvo)) return salvo;
-  } catch (e) { /* ignora e usa os exemplos */ }
-  return exemplos();
+  return Tarefas.ler(USUARIO_ATUAL);
 }
 
 let itens = carregar();
@@ -492,4 +479,43 @@ $('assist-form').addEventListener('submit', (e) => {
   $('assist-input').value = '';
   addMsg(texto, 'user');
   setTimeout(() => { if (configAssist) addMsg(personalizar(responder(texto)), 'bot'); }, 350);
+});
+
+/* ---------- usuário logado, aba do jogo e progresso ---------- */
+const SESSAO = Auth.sessao() || { nome: '', usuario: 'colaborador' };
+$('u-nome').textContent = SESSAO.nome;
+$('u-av').textContent = SESSAO.nome.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
+$('sair').addEventListener('click', () => Auth.sair());
+
+const quadroJogo = $('jogo-frame');
+function focarJogo() { try { quadroJogo.contentWindow.focus(); } catch (e) {} }
+
+// O jogo só é carregado na primeira vez que a aba é aberta (os arquivos são pesados).
+function abrirJogo() {
+  if (!quadroJogo.getAttribute('src')) quadroJogo.src = 'jogo/index.html';
+  renderFaixaJogo();
+  setTimeout(focarJogo, 250);
+}
+document.querySelectorAll('[data-aba="jogo"]').forEach((el) => el.addEventListener('click', abrirJogo));
+quadroJogo.addEventListener('load', focarJogo);
+$('jogo-full').addEventListener('click', () => { if (quadroJogo.requestFullscreen) quadroJogo.requestFullscreen().then(focarJogo).catch(() => {}); });
+
+function renderFaixaJogo() {
+  const p = Progresso.ler(SESSAO.usuario);
+  const f = p.fases[p.faseAtual];
+  if (!f) { $('jogo-strip').innerHTML = '<span class="pill">Pronto para começar o onboarding</span>'; return; }
+  const pills = [`${Progresso.rotulo(p.faseAtual, f)}`, `Progresso geral: ${Progresso.percentual(p)}%`];
+  if (f.totalDuvidas) pills.push(`Dúvidas ${f.duvidas}/${f.totalDuvidas}`);
+  if (f.totalCrachas) pills.push(`Crachás ${f.crachas}/${f.totalCrachas}`);
+  if (f.totalCheckpoints) pills.push(`Checkpoints ${f.checkpoints}/${f.totalCheckpoints}`);
+  if (p.concluido) pills.push('Onboarding concluído 🎉');
+  $('jogo-strip').innerHTML = pills.map((t) => `<span class="pill">${esc(t)}</span>`).join('');
+}
+
+// Eventos enviados pelo jogo (iframe) → salvam o progresso que o supervisor acompanha.
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || d.origem !== 'onboarding-jogo' || e.source !== quadroJogo.contentWindow) return;
+  Progresso.registrar(d, SESSAO.usuario);
+  renderFaixaJogo();
 });

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="plataforma.css">
+  <script src="plataforma.js"></script>
+  <script>Auth.exigir('colaborador');</script>
 </head>
 <body>
 
@@ -38,6 +41,9 @@
     <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
     <symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
     <symbol id="i-plane" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><rect x="2" y="6" width="20" height="12" rx="5"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
   </defs>
 </svg>
 
@@ -48,8 +54,11 @@
       <span><strong>Gerenciador</strong><small>CRUD com estilo</small></span>
     </div>
     <div class="topbar-actions">
+      <button class="btn-icon" type="button" data-aba="jogo" title="Jogo de onboarding"><svg class="ico"><use href="#i-gamepad"/></svg></button>
       <button class="btn-icon" type="button" data-aba="ia" title="Assistente IA"><svg class="ico"><use href="#i-sparkles"/></svg></button>
       <button class="btn-primary" type="button" id="btn-novo"><svg class="ico"><use href="#i-plus"/></svg> Novo item</button>
+      <span class="user-chip"><span class="av" id="u-av"></span><span class="nm" id="u-nome"></span></span>
+      <button class="btn-icon" type="button" id="sair" title="Sair"><svg class="ico"><use href="#i-logout"/></svg></button>
     </div>
   </div>
 </header>
@@ -59,6 +68,7 @@
     <button class="tab active" type="button" data-aba="itens"><svg class="ico"><use href="#i-layers"/></svg> Itens</button>
     <button class="tab" type="button" data-aba="analises"><svg class="ico"><use href="#i-chart"/></svg> Análises</button>
     <button class="tab" type="button" data-aba="ia"><svg class="ico"><use href="#i-chat"/></svg> IA</button>
+    <button class="tab" type="button" data-aba="jogo"><svg class="ico"><use href="#i-gamepad"/></svg> Onboarding</button>
   </nav>
 
   <!-- ========== ITENS ========== -->
@@ -119,6 +129,17 @@
     </div>
 
     <div class="callout" id="taxa"></div>
+  </section>
+
+  <!-- ========== JOGO (carregado em iframe, dentro da mesma página, com a top-bar visível) ========== -->
+  <section id="aba-jogo" class="aba">
+    <div class="card game-card">
+      <header class="card-h"><h3>Onboarding · Primeiro dia</h3>
+        <button class="btn-ghost sm" type="button" id="jogo-full"><svg class="ico"><use href="#i-expand"/></svg> Tela cheia</button></header>
+      <div class="game-strip" id="jogo-strip"></div>
+      <div class="game-box"><iframe id="jogo-frame" title="Jogo de onboarding" allow="fullscreen"></iframe></div>
+      <p class="game-help">Setas ou A/D: andar · Espaço: pular · E: interagir · Enter: avançar diálogos</p>
+    </div>
   </section>
 
   <!-- ========== IA ========== -->

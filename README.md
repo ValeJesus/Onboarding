@@ -14,3 +14,11 @@ Interface estática (HTML + CSS + JS), sem build e sem servidor. Os dados ficam 
 3. Aguarde um minuto: o site abre em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
 
 Localmente, basta dar dois cliques no `index.html`.
+
+## Login, jogo e supervisor
+- `login.html` — entrada. Contas de demonstração: `colaborador / colab123` (Lucas), `colaborador2 / colab456` (Beatriz) e `supervisor / super123` (edite em `plataforma.js`).
+- `index.html` — página do colaborador; a aba **Onboarding** (e o ícone de controle na top-bar) mostra o jogo na mesma página, sem esconder a top-bar.
+- `supervisor.html` — painel do supervisor com seletor de colaborador e duas abas: **Progresso no jogo** (porcentagem, fases, tentativas, vidas, tempo, atividade recente) e **Progresso na empresa** (atividades do Gerenciador, com filtros por status e prioridade). Cada colaborador tem as próprias atividades.
+- `plataforma.js` — usuários, sessão e progresso. `jogo/game.js` envia o progresso por `postMessage`.
+- Tudo é salvo no `localStorage`: colaborador e supervisor precisam usar o **mesmo navegador/computador**. Para uso real entre máquinas, troque `Progresso` e `Auth` por chamadas a um servidor.
+- As senhas ficam visíveis no código: isto é uma demonstração, não segurança real.
