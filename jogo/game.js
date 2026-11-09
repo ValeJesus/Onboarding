@@ -988,14 +988,16 @@ function criarEfeitosFase1(cena, fase) {
   };
   agendarPisca();
 
-  // A faixa é mais larga que a tela para se mover sem revelar as bordas.
-  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 42,
-    LARGURA_TELA + 100, 110, 0xc8873a, 0.22)
+  // A névoa âmbar é fixa na tela; compensa o zoom para cobrir todo o viewport.
+  const zoomCamera = cena.cameras.main.zoom || 1;
+  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
+    LARGURA_TELA / zoomCamera + 4, ALTURA_TELA / zoomCamera + 4,
+    0xc8873a, 0.035)
     .setScrollFactor(0).setDepth(60);
   cena.tweens.add({
     targets: nevoaAmbar,
-    x: LARGURA_TELA / 2 + 34,
-    duration: 4200,
+    alpha: { from: 0.025, to: 0.055 },
+    duration: 5200,
     ease: 'Sine.easeInOut',
     yoyo: true,
     repeat: -1

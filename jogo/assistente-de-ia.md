@@ -338,7 +338,7 @@ Para adicionar texturas à Fase 2, basta acrescentar novas chaves em `window.ASS
 - `cenario_fase1.jpg` é desenhado em painéis de 800×450 ao longo do percurso, com `scrollFactor` horizontal 1 e vertical 0. Se a imagem nova não carregar, `game.js` usa o fundo antigo `fundo_fase1` ou um preenchimento provisório.
 - A câmera usa fundo `#111225` na Fase 1 para evitar que uma borda sem imagem apareça azul.
 - Um overlay escuro tem alpha base 0.14. Em intervalos aleatórios de 900–3600 ms, pisca por 90–240 ms; aproximadamente uma em cada cinco piscadas é mais forte.
-- Uma faixa âmbar semitransparente (`0xc8873a`) no rodapé move-se horizontalmente em tween suave.
+- Uma névoa âmbar muito sutil (`0xc8873a`) cobre a tela inteira como overlay fixo e compensa o zoom atual da câmera; sua intensidade pulsa lentamente para não formar uma faixa ou quadrado aparente.
 - O chão usa uma textura repetida e um retângulo Arcade estático. As plataformas têm arte de estante e colisão Arcade sólida; as estantes de obstáculo e caixas das escadas também têm corpos sólidos.
 
 ## Fluxo principal em `game.js`
