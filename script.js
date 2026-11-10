@@ -342,7 +342,7 @@ function renderTudo() {
 renderTudo();
 
 /* ---------- assistente virtual (widget no canto inferior direito) ---------- */
-const NOME_ASSISTENTE = 'Clara';
+const NOME_ASSISTENTE = 'Kayla';
 const CHAVE_ASSIST = 'gerenciador-assistente-v1';
 const EXEMPLOS = [
   'Quais itens da categoria estudo estão ativos?',

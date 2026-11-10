@@ -21,7 +21,7 @@
       z-index: 20;
       display: grid;
       place-items: center;
-      overflow: auto;
+      overflow: hidden;
       padding: 24px;
       box-sizing: border-box;
       color: #fff4d6;
@@ -117,6 +117,212 @@
       .menu-painel { padding: 30px 22px; }
       .menu-painel p { font-size: 14px; }
     }
+    /* Acabamento em blocos inspirado na arte pixel do jogo. */
+    html, body { background: #101522; }
+    #menu-inicial {
+      color: #f8e8bd;
+      font-family: "Courier New", monospace;
+      background-color: #151a2a;
+      background-image:
+        linear-gradient(90deg, transparent 96%, #293348 96%),
+        linear-gradient(0deg, transparent 96%, #293348 96%),
+        radial-gradient(#e7b965 1px, transparent 1.5px),
+        linear-gradient(180deg, #171d31 0%, #33203c 58%, #111522 100%);
+      background-size: 32px 32px, 32px 32px, 48px 48px, 100% 100%;
+    }
+    .menu-painel {
+      width: min(680px, 100%);
+      padding: clamp(24px, 5vw, 46px);
+      border: 4px solid #f0c66d;
+      background: #20283a;
+      box-shadow: 0 0 0 5px #0b101b, 0 12px 0 #090d16, 8px 8px 0 #743f4c;
+      image-rendering: pixelated;
+      max-height: calc(100vh - 24px);
+      overflow: hidden;
+    }
+    .menu-selo {
+      padding: 8px 12px;
+      border: 2px solid #8ec9b0;
+      color: #a9e3c3;
+      background: #182737;
+      font-family: "Courier New", monospace;
+      letter-spacing: .12em;
+    }
+    .menu-cenario {
+      position: relative;
+      width: min(340px, 100%);
+      height: 96px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+      border: 3px solid #9b704f;
+      background:
+        linear-gradient(180deg, transparent 0 63%, #654537 63% 100%),
+        linear-gradient(90deg, transparent 0 8%, #2b3850 8% 20%, transparent 20% 26%, #402d4a 26% 40%, transparent 40% 52%, #263b4d 52% 67%, transparent 67% 73%, #483249 73% 90%, transparent 90%),
+        linear-gradient(#342b50 0 55%, #24253b 55%);
+      box-shadow: inset 0 -8px 0 #342633, 0 5px 0 #101522;
+      image-rendering: pixelated;
+    }
+    .menu-cenario::before {
+      content: "";
+      position: absolute;
+      left: 44%;
+      bottom: 20px;
+      width: 42px;
+      height: 42px;
+      background: #f2bf63;
+      box-shadow: 0 0 0 5px #402b3c, 0 0 18px 8px #f2a94c88;
+      clip-path: polygon(25% 0, 75% 0, 75% 25%, 100% 25%, 100% 75%, 75% 75%, 75% 100%, 25% 100%, 25% 75%, 0 75%, 0 25%, 25% 25%);
+    }
+    .menu-painel h1 {
+      color: #ffdf91;
+      font-family: "Courier New", monospace;
+      font-weight: 900;
+      font-size: clamp(34px, 8vw, 58px);
+      text-shadow: 4px 4px 0 #743c4c, 7px 7px 0 #09111f;
+    }
+    .menu-painel p { color: #c6d0d5; font-family: "Courier New", monospace; }
+    .menu-botao, .fase-botao, .menu-voltar {
+      font-family: "Courier New", monospace;
+      image-rendering: pixelated;
+    }
+    .menu-botao {
+      min-height: 64px;
+      border: 3px solid #ffe3a1;
+      background: #d6a54f;
+      box-shadow: 0 6px 0 #724a39, 5px 5px 0 #101522;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    #tela-selecao h2 { color: #ffdf91; font-family: "Courier New", monospace; }
+    #lista-fases { gap: 12px; }
+    .fase-botao {
+      min-height: 76px;
+      padding: 12px 16px;
+      border: 3px solid #8197a4;
+      color: #f5e7c3;
+      background: #29374a;
+      box-shadow: 0 5px 0 #111925, 4px 4px 0 #0b101b;
+    }
+    .fase-botao:hover { border-color: #f0c66d; }
+    .fase-botao.fase-quiz { border-color: #8ec9b0; background: #263f43; }
+    .fase-numero {
+      flex-basis: 44px;
+      height: 44px;
+      border: 3px solid #d6b36d;
+      color: #ffe19a;
+      background: #1c2938;
+      font-size: 18px;
+      box-shadow: 3px 3px 0 #111925;
+    }
+    .fase-quiz .fase-numero { border-color: #8ec9b0; color: #b1e8c9; }
+    .fase-texto strong { font-size: 17px; }
+    .fase-texto small { color: #c2d0d6; line-height: 1.35; }
+    .menu-voltar { color: #d5dedf; }
+    #quiz-tela {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 22px;
+      box-sizing: border-box;
+      color: #f8e8bd;
+      font-family: "Courier New", monospace;
+      background-color: #151a2a;
+      background-image: linear-gradient(90deg, transparent 96%, #293348 96%),
+        linear-gradient(0deg, transparent 96%, #293348 96%),
+        linear-gradient(180deg, #171d31 0%, #33203c 58%, #111522 100%);
+      background-size: 32px 32px, 32px 32px, 100% 100%;
+    }
+    .quiz-painel {
+      width: min(720px, 100%);
+      padding: clamp(22px, 5vw, 40px);
+      box-sizing: border-box;
+      max-height: calc(100vh - 24px);
+      overflow: hidden;
+      border: 4px solid #f0c66d;
+      background: #20283a;
+      box-shadow: 0 0 0 5px #0b101b, 0 12px 0 #090d16, 8px 8px 0 #743f4c;
+    }
+    .quiz-topo { display: flex; justify-content: space-between; gap: 12px; color: #a9e3c3; font-size: 13px; font-weight: 700; }
+    .quiz-painel h2 { margin: 16px 0 20px; color: #ffdf91; font-size: clamp(23px, 5vw, 32px); }
+    #quiz-pergunta { margin: 0 0 20px; color: #fff3d2; font-size: clamp(17px, 3vw, 21px); line-height: 1.45; }
+    #quiz-opcoes { display: grid; gap: 10px; }
+    .quiz-opcao, .quiz-botao {
+      padding: 13px 15px;
+      border: 3px solid #8197a4;
+      color: #f5e7c3;
+      background: #29374a;
+      box-shadow: 0 4px 0 #111925;
+      font: 700 15px/1.35 "Courier New", monospace;
+      text-align: left;
+      cursor: pointer;
+    }
+    .quiz-opcao:hover:not(:disabled), .quiz-botao:hover { border-color: #f0c66d; filter: brightness(1.12); }
+    .quiz-opcao.correta { border-color: #8ec9b0; background: #26483f; }
+    .quiz-opcao.incorreta { border-color: #d97878; background: #552f3b; }
+    .quiz-retorno { min-height: 42px; margin: 18px 0 10px; color: #c6d0d5; line-height: 1.45; }
+    .retorno-correto { color: #a9e3c3; }
+    .retorno-incorreto { color: #ffc3a9; }
+    .quiz-acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .quiz-botao { text-align: center; }
+    .quiz-botao-principal { border-color: #ffe3a1; color: #1d2634; background: #d6a54f; }
+    .quiz-botao-secundario { background: #263f43; }
+    .quiz-opcao:focus-visible, .quiz-botao:focus-visible { outline: 3px solid #a9e3c3; outline-offset: 3px; }
+    @media (max-width: 480px) {
+      .menu-painel { padding: 26px 20px; }
+      .fase-botao { gap: 12px; }
+      .quiz-topo { font-size: 11px; }
+    }
+    @media (max-height: 600px) {
+      #menu-inicial { padding: 8px 14px; }
+      .menu-painel { padding: 12px 24px; }
+      .menu-selo { margin-bottom: 8px; padding: 5px 9px; font-size: 10px; }
+      .menu-cenario { height: 48px; margin-bottom: 8px; }
+      .menu-cenario::before { bottom: 8px; width: 24px; height: 24px; }
+      .menu-painel h1 { font-size: clamp(27px, 8vh, 38px); line-height: .92; }
+      .menu-painel p { margin: 10px auto 12px; font-size: 13px; line-height: 1.3; }
+      .menu-botao { min-height: 46px; padding: 9px 14px; }
+      #tela-selecao h2 { margin: 0 0 5px; font-size: 23px; }
+      #tela-selecao p { margin: 0 auto 10px; }
+      #lista-fases { gap: 7px; }
+      .fase-botao { min-height: 57px; padding: 7px 11px; }
+      .fase-numero { flex-basis: 36px; height: 36px; font-size: 15px; }
+      .fase-texto { gap: 1px; }
+      .fase-texto strong { font-size: 14px; }
+      .fase-texto small { font-size: 11px; line-height: 1.15; }
+      .menu-voltar { margin-top: 8px; padding: 5px 8px; font-size: 13px; }
+    }
+    @media (max-height: 420px) {
+      #menu-inicial { padding: 4px 10px; }
+      .menu-painel { padding: 8px 18px; }
+      #tela-inicio .menu-cenario { display: none; }
+      .menu-painel p { margin: 6px auto 8px; }
+      .fase-botao { min-height: 49px; }
+      .fase-numero { flex-basis: 30px; height: 30px; }
+    }
+    @media (max-height: 600px) {
+      #quiz-tela { padding: 8px 14px; }
+      .quiz-painel { padding: 10px 18px; }
+      .quiz-topo { font-size: 10px; }
+      .quiz-painel h2 { margin: 6px 0 8px; font-size: 21px; }
+      #quiz-pergunta { margin: 0 0 9px; font-size: 15px; line-height: 1.25; }
+      #quiz-opcoes { gap: 6px; }
+      .quiz-opcao, .quiz-botao { padding: 7px 10px; font-size: 13px; line-height: 1.2; }
+      .quiz-retorno { min-height: 28px; margin: 8px 0 5px; font-size: 12px; line-height: 1.25; }
+      .quiz-acoes { gap: 8px; margin-top: 4px; }
+    }
+    @media (max-height: 420px) {
+      #quiz-tela { padding: 4px 10px; }
+      .quiz-painel { padding: 7px 12px; }
+      .quiz-painel h2 { margin: 3px 0 5px; font-size: 18px; }
+      #quiz-pergunta { margin-bottom: 6px; font-size: 13px; }
+      #quiz-opcoes { gap: 4px; }
+      .quiz-opcao, .quiz-botao { padding: 5px 8px; font-size: 12px; }
+      .quiz-retorno { min-height: 22px; margin: 5px 0 3px; font-size: 11px; }
+      .quiz-acoes { margin-top: 2px; }
+    }
   </style>
 </head>
 <body>
@@ -124,7 +330,9 @@
   <main id="menu-inicial" aria-label="Menu de Estagiário Bros">
     <section class="menu-painel" id="tela-inicio" aria-labelledby="titulo-jogo">
       <span class="menu-selo">Missão de onboarding</span>
+      <div class="menu-cenario" aria-hidden="true"></div>
       <h1 id="titulo-jogo">ESTAGIÁRIO<br>BROS</h1>
+      <p>Explore o estúdio, recupere o projeto e mostre o que aprendeu.</p>
       <button class="menu-botao" id="botao-jogar" type="button">Jogar</button>
     </section>
     <section class="menu-painel" id="tela-selecao" aria-labelledby="titulo-selecao" hidden>
@@ -135,6 +343,20 @@
       <button class="menu-voltar" id="botao-voltar" type="button">Voltar</button>
     </section>
   </main>
+  <section id="quiz-tela" aria-labelledby="quiz-titulo" hidden>
+    <div class="quiz-painel">
+      <div class="quiz-topo"><span id="quiz-progresso">PERGUNTA 1 / 6</span><span id="quiz-placar">ACERTOS 0</span></div>
+      <h2 id="quiz-titulo">Quiz</h2>
+      <p id="quiz-pergunta"></p>
+      <div id="quiz-opcoes"></div>
+      <p id="quiz-retorno" class="quiz-retorno" aria-live="polite"></p>
+      <div class="quiz-acoes">
+        <button id="quiz-avancar" class="quiz-botao quiz-botao-principal" type="button" hidden>Próxima pergunta</button>
+        <button id="quiz-refazer" class="quiz-botao quiz-botao-principal" type="button" hidden>Refazer quiz</button>
+        <button id="quiz-menu" class="quiz-botao quiz-botao-secundario" type="button" hidden>Voltar às fases</button>
+      </div>
+    </div>
+  </section>
   <script>
     // Tenta Phaser local primeiro e usa as CDNs como alternativa.
     function carregarScript(src) {
@@ -164,6 +386,8 @@
         await carregarScript('assets_fase1_novos.js');
         // As imagens exclusivas da Fase 2 ficam em um arquivo próprio.
         await carregarScript('assets_fase2.js');
+        // Retratos grandes dos NPCs, recortados e sem o fundo verde.
+        await carregarScript('assets_npc_dialogo.js');
         await carregarScript('levels.js');
         await carregarScript('dialogs.js');
         await carregarScript('game.js');
