@@ -45,9 +45,6 @@ const ALTURA_ARTE_JOGADOR = 961;
 const LARGURA_ARTE_PARADO_2 = 248;
 const ALTURA_ARTE_PARADO_2 = 612;
 const INTERVALO_ANIMACAO_PARADO = 750;
-const VELOCIDADE_CORRIDA = 320;
-const ACELERACAO_CORRIDA = 1850;
-const INTERVALO_ANIMACAO_CORRIDA_RAPIDA = 88;
 const CAMERA_ANTECIPACAO_MAXIMA = 72;
 const CAMERA_LIMITE_VERTICAL = 30;
 const FASES = window.LEVELS;
@@ -81,12 +78,70 @@ function avisarPlataforma(dados) {
 function iniciarJogo() {
   if (jogoIniciado) return;
   if (!window.Phaser) {
-    document.getElementById("aviso").textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
+    const aviso = document.getElementById("aviso");
+    if (aviso) aviso.textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
     return;
   }
   jogoIniciado = true;
-  document.getElementById("aviso").remove();
+  const aviso = document.getElementById("aviso");
+  if (aviso) aviso.remove();
   new Phaser.Game(config);
+}
+
+function prepararMenuInicio() {
+  const menu = document.getElementById("menu-inicial");
+  const telaInicio = document.getElementById("tela-inicio");
+  const telaSelecao = document.getElementById("tela-selecao");
+  const listaFases = document.getElementById("lista-fases");
+  const aviso = document.getElementById("aviso");
+  if (!menu || !telaInicio || !telaSelecao || !listaFases) {
+    iniciarJogo();
+    return;
+  }
+
+  const descricoes = {
+    1: "Observar — reconheça o estúdio e descubra como o time trabalha.",
+    2: "Executar — atravesse a segurança e recupere o projeto do time."
+  };
+  FASES.forEach((fase, indice) => {
+    const botao = document.createElement("button");
+    botao.className = "fase-botao";
+    botao.type = "button";
+    const numero = document.createElement("span");
+    numero.className = "fase-numero";
+    numero.textContent = String(fase.id || indice + 1);
+    const texto = document.createElement("span");
+    texto.className = "fase-texto";
+    const nome = document.createElement("strong");
+    nome.textContent = fase.nome || `Fase ${indice + 1}`;
+    const descricao = document.createElement("small");
+    descricao.textContent = descricoes[fase.id] || "Continue sua jornada de onboarding.";
+    texto.append(nome, descricao);
+    botao.append(numero, texto);
+    botao.addEventListener("click", () => {
+      if (!window.Phaser) {
+        if (aviso) aviso.textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
+        return;
+      }
+      indiceFaseAtual = indice;
+      menu.remove();
+      iniciarJogo();
+    });
+    listaFases.appendChild(botao);
+  });
+
+  document.getElementById("botao-jogar")?.addEventListener("click", () => {
+    telaInicio.hidden = true;
+    telaSelecao.hidden = false;
+    listaFases.querySelector("button")?.focus();
+  });
+  document.getElementById("botao-voltar")?.addEventListener("click", () => {
+    telaSelecao.hidden = true;
+    telaInicio.hidden = false;
+    document.getElementById("botao-jogar")?.focus();
+  });
+
+  if (window.Phaser && aviso) aviso.remove();
 }
 
 let jogador;
@@ -364,7 +419,7 @@ function create() {
   jogador.body.setSize(LARGURA_ARTE_JOGADOR * 0.70, ALTURA_ARTE_JOGADOR * 0.90, false);
   jogador.body.setOffset(LARGURA_ARTE_JOGADOR * 0.15, ALTURA_ARTE_JOGADOR * 0.10);
   jogador.body.setCollideWorldBounds(true);
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
 
   // Objetos estáticos tornam as plataformas imóveis e compatíveis com colisões Arcade.
   plataformas = cena.physics.add.staticGroup();
@@ -424,12 +479,16 @@ function create() {
   criarInimigos(cena, fase.inimigos || []);
   // Instancia itens cadastrados e prepara seus contadores no HUD.
   criarColetaveis(cena, fase.coletaveis || []);
-  // A TI usa a imagem enviada (32x32); a Fase 1 mantém o retrato da Marina.
+  // A TI usa a imagem fornecida ampliada e alinhada pelo chão; Fase 1 mantém a arte da Marina.
   if (fase.npc) {
     if (fase.id === 2) {
+      const larguraTecnico = 56;
+      const alturaTecnico = 76;
+      const yTecnico = fase.npc.y - (alturaTecnico - 32) / 2;
       npcSprite = cena.textures.exists("npc_ti_1")
-        ? cena.add.image(fase.npc.x, fase.npc.y, "npc_ti_1").setDisplaySize(32, 32).setDepth(5)
-        : cena.add.rectangle(fase.npc.x, fase.npc.y, 32, 32, 0x3183d4).setDepth(5);
+        ? cena.add.image(fase.npc.x, yTecnico, "npc_ti_1")
+          .setDisplaySize(larguraTecnico, alturaTecnico).setDepth(5)
+        : cena.add.rectangle(fase.npc.x, yTecnico, larguraTecnico, alturaTecnico, 0x3183d4).setDepth(5);
     } else {
       npcSprite = cena.add.image(fase.npc.x, fase.npc.y, "npc_mentora_1")
         .setDisplaySize(LARGURA_NPC_TELA, ALTURA_NPC_TELA)
@@ -454,7 +513,7 @@ function create() {
   }).setScrollFactor(0).setDepth(1000);
   atualizarHUDColetaveis();
   cena.add.text(20, ALTURA_TELA - 12,
-    fase.id === 2 ? '[Shift] Correr   [M] Som' : '[M] Som',
+    '[M] Som',
     { fontFamily: 'sans-serif', fontSize: '13px', color: '#f3dfb2',
       stroke: '#172033', strokeThickness: 3 }
   ).setOrigin(0, 1).setScrollFactor(0).setDepth(1000);
@@ -489,7 +548,6 @@ function create() {
     espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
     enter: Phaser.Input.Keyboard.KeyCodes.ENTER,
     e: Phaser.Input.Keyboard.KeyCodes.E,
-    shift: Phaser.Input.Keyboard.KeyCodes.SHIFT,
     mudo: Phaser.Input.Keyboard.KeyCodes.M
   });
   if (window.EFEITOS_JOGO) {
@@ -642,11 +700,10 @@ function update(time, delta) {
   const esquerda = teclas.esquerda.isDown || teclas.a.isDown;
   const direita = teclas.direita.isDown || teclas.d.isDown;
   const direcao = esquerda === direita ? 0 : (esquerda ? -1 : 1);
-  const corridaAtiva = faseAtual.id === 2 && teclas.shift.isDown && direcao !== 0;
-  let aceleracaoAtual = corridaAtiva ? ACELERACAO_CORRIDA : ACELERACAO_JOGADOR;
+  let aceleracaoAtual = ACELERACAO_JOGADOR;
   const velocidadeXAtual = jogador.body.velocity.x;
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
-  if (!corridaAtiva && direcao !== 0 && Math.sign(velocidadeXAtual) === direcao &&
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
+  if (direcao !== 0 && Math.sign(velocidadeXAtual) === direcao &&
       Math.abs(velocidadeXAtual) >= VELOCIDADE_JOGADOR) {
     aceleracaoAtual = 0;
     if (Math.abs(velocidadeXAtual) > VELOCIDADE_JOGADOR) {
@@ -690,9 +747,7 @@ function update(time, delta) {
         aplicarPoseCorrida(quadroCorridaAtual);
       } else {
         tempoAnimacaoCorrida += delta;
-        const intervaloCorrida = corridaAtiva
-          ? INTERVALO_ANIMACAO_CORRIDA_RAPIDA : INTERVALO_ANIMACAO_CORRIDA;
-        if (tempoAnimacaoCorrida >= intervaloCorrida) {
+        if (tempoAnimacaoCorrida >= INTERVALO_ANIMACAO_CORRIDA) {
           tempoAnimacaoCorrida = 0;
           quadroCorridaAtual = (quadroCorridaAtual + 1) % SPRITES_CORRIDA.length;
           aplicarPoseCorrida(quadroCorridaAtual);
@@ -984,9 +1039,11 @@ function criarEfeitosFase1(cena, fase) {
       .setScrollFactor(0.3, 0).setDepth(-100);
   }
 
-  // Oscila o alpha em intervalos aleatórios; algumas piscadas ficam mais fortes.
+  // A luz ambiente oscila em toda a tela; o tamanho compensa o zoom da câmera.
+  const zoomCamera = cena.cameras.main.zoom || 1;
   const overlayEscuro = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
-    LARGURA_TELA, ALTURA_TELA, 0x05070d, 0.14)
+    LARGURA_TELA / zoomCamera + 4, ALTURA_TELA / zoomCamera + 4,
+    0x05070d, 0.1)
     .setScrollFactor(0).setDepth(50);
   const agendarPisca = () => {
     if (!overlayEscuro.active) return;
@@ -994,25 +1051,26 @@ function criarEfeitosFase1(cena, fase) {
       if (!overlayEscuro.active) return;
       const piscadaForte = Math.random() < 0.2;
       overlayEscuro.setFillStyle(0x05070d, piscadaForte
-        ? Phaser.Math.FloatBetween(0.48, 0.66)
-        : Phaser.Math.FloatBetween(0.22, 0.38));
+        ? Phaser.Math.FloatBetween(0.3, 0.38)
+        : Phaser.Math.FloatBetween(0.15, 0.22));
       cena.time.delayedCall(Phaser.Math.Between(90, 240), () => {
         if (!overlayEscuro.active) return;
-        overlayEscuro.setFillStyle(0x05070d, 0.14);
+        overlayEscuro.setFillStyle(0x05070d, 0.1);
         agendarPisca();
       });
     });
   };
   agendarPisca();
 
-  // A faixa é mais larga que a tela para se mover sem revelar as bordas.
-  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 42,
-    LARGURA_TELA + 100, 110, 0xc8873a, 0.22)
+  // O overlay é fixo na tela e compensa o zoom para cobrir todo o viewport.
+  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
+    LARGURA_TELA / zoomCamera + 4, ALTURA_TELA / zoomCamera + 4,
+    0xc8873a, 0.035)
     .setScrollFactor(0).setDepth(60);
   cena.tweens.add({
     targets: nevoaAmbar,
-    x: LARGURA_TELA / 2 + 34,
-    duration: 4200,
+    alpha: { from: 0.025, to: 0.055 },
+    duration: 5200,
     ease: 'Sine.easeInOut',
     yoyo: true,
     repeat: -1
@@ -1612,7 +1670,7 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
   }
   jogador.body.setAcceleration(0, 0);
   jogador.body.setGravityY(0);
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
   poseNoArAtual = '';
   poseCorridaAtiva = false;
   quadroParadoDois = false;
@@ -1705,6 +1763,6 @@ function avancarDialogoNPC(cena) {
     `${falasNPC[indiceFalaNPC]}\n\nEspaço ou Enter para avançar`
   );
 }
-// O index.html carrega Phaser e assets.js antes de iniciar o jogo.
-iniciarJogo();
+// O jogador escolhe uma fase no menu antes de criar a cena Phaser.
+prepararMenuInicio();
 

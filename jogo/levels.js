@@ -168,6 +168,14 @@ window.LEVELS = [
     ],
     // O cofre fica logo após o corredor; os obstáculos do retorno ficam no trecho até a saída.
     cofre: { x: 4000, y: 358 },
+    licao: {
+      titulo: "Execução concluída!",
+      itens: [
+        "Observar lasers — Planejar antes de agir",
+        "Acionar colega de TI — Pedir ajuda e comunicar",
+        "Checkpoint, cofre e fuga — Retomar erros e entregar no prazo"
+      ]
+    },
     // A saída é desenhada como um retângulo verde pela lógica do jogo.
     meta: { x: 4900, y: 358 }
   }

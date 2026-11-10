@@ -11,7 +11,7 @@ A entrada atual do jogo é **`index.html`**. O projeto está dividido em arquivo
 1. `index.html` tenta carregar `phaser.min.js` da mesma pasta.
 2. Se a cópia local falhar, tenta Phaser 3.90.0 por jsDelivr e depois cdnjs.
 3. Carrega `efeitos-audio.js` e depois, em sequência, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `levels.js`, `dialogs.js` e `game.js`.
-4. `game.js` inicia o Phaser depois que as dependências foram carregadas.
+4. `game.js` exibe a tela de início **Estagiário Bros**. Depois de clicar em `Jogar`, o jogador escolhe uma fase pelo nome; então o Phaser inicia diretamente nela.
 
 A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver disponível, o navegador precisa de conexão para usar as CDNs. O canvas se ajusta à janela preservando a proporção 16:9 e a nitidez da pixel art. `jogo-plataforma.html` e `jogo-luz-vermelha-teste.html` são protótipos anteriores; **não são a entrada desta versão**.
 
@@ -35,8 +35,8 @@ A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver 
 
 - **Andar:** setas esquerda/direita ou `A`/`D`.
 - **Pular:** `Espaço` ou seta para cima. Segurar o botão por até 240 ms pode aumentar a altura do salto.
-- **Correr (Fase 2):** segure `Shift` enquanto anda.
 - **Som:** `M` alterna os efeitos sonoros.
+- **Menu inicial:** clique em `Jogar` e escolha `Observar` ou `Executar` para selecionar a fase de início.
 - **Interruptor (Fase 2):** `E` quando estiver a menos de 80 px e o prompt `[E] Ativar` aparecer.
 - **Diálogo da mentora (Fase 1):** `Espaço` ou `Enter` avança cada fala.
 - **Diálogo da TI (Fase 2):** somente `Enter` avança cada fala.
@@ -44,6 +44,8 @@ A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver 
 - **Game Over:** `Enter` reinicia a fase atual com três vidas.
 
 Na Fase 1, o jogador começa a menos de 80 px da Marina, então a primeira conversa abre logo no início. A conversa pausa a física, o relógio e as animações; os controles de diálogo continuam ativos.
+
+O menu é construído em `jogo/index.html` e preenchido por `prepararMenuInicio()` em `game.js`, usando os nomes definidos em `levels.js`. A escolha inicial define `indiceFaseAtual`; concluir uma fase segue para a próxima normalmente.
 
 ## Configurações principais (`game.js`)
 
@@ -70,8 +72,6 @@ Os valores ajustáveis estão no topo de `game.js`. Distâncias e velocidades es
 | `CAMERA_ANTECIPACAO_MAXIMA` | 72 | Avanço fixo horizontal da câmera para a direita em relação ao personagem. |
 | `CAMERA_LIMITE_VERTICAL` | 30 | Margem inferior das bordas da câmera; ela permanece fixa no eixo vertical. |
 | `ALTURA_SPRITE_JOGADOR` | 80 | Altura-base do personagem; a câmera da Fase 1 usa zoom 0,9. |
-| `VELOCIDADE_CORRIDA` | 320 | Velocidade máxima ao segurar Shift na Fase 2. |
-| `ACELERACAO_CORRIDA` | 1850 | Aceleração horizontal durante a corrida na Fase 2. |
 | `VIDAS_INICIAIS` | 3 | Vidas ao iniciar e ao reiniciar após Game Over. |
 | `TEMPO_FUGA` | 15000 | Tempo em ms para fugir após pegar o projeto (Fase 2). |
 | `DURACAO_INVENCIBILIDADE_MS` | 1000 | Proteção depois de receber dano. |
@@ -172,6 +172,7 @@ Convenção de coordenadas:
 - **Cofre** em `x=4000`, sobre um pedestal técnico; ao tocar, abre visualmente e revela uma pasta do projeto. A coleta inicia 15 s de fuga com overlay vermelho e HUD de contagem.
 - Durante a fuga, há dois racks técnicos que precisam ser saltados e uma escadaria de cases de equipamento em degraus, com um vão maior no meio. Esses obstáculos originais da Fase 2 ficam entre o cofre e a saída.
 - Meta em `x=4900`. Sem o projeto, a meta exibe aviso e não permite avançar.
+- Lição final “Execução concluída!”: observar lasers para planejar antes de agir; acionar a colega de TI para pedir ajuda e comunicar; usar checkpoint, cofre e fuga para retomar erros e entregar no prazo.
 - Respawn após dano sempre no checkpoint mais recente; fuga reinicia com 15 s a cada respawn no cofre.
 
 ## Textos (`dialogs.js` e `levels.js`)
@@ -257,7 +258,7 @@ Criados por `criarCheckpoints(cena, fase.checkpoints)`. Ao tocar:
 
 ### NPC
 
-- `npc` define a posição do centro. O sprite da mentora (Fase 1) é exibido a 60×92 px e fica apoiado no chão. O NPC de TI (Fase 2) é exibido a 32×32 px.
+- `npc` define a posição do centro. O sprite da mentora (Fase 1) é exibido a 60×92 px e fica apoiado no chão. O técnico de TI (Fase 2) é exibido a 56×76 px e tem os pés alinhados com a superfície do chão.
 - A conversa abre a menos de 80 px. Cada NPC só inicia sua conversa uma vez por visita à fase.
 - A caixa de diálogo aparece no rodapé. Fase 1: `Espaço` ou `Enter` avança. Fase 2: somente `Enter` avança.
 - Física, relógio e tweens ficam pausados até terminar.
@@ -337,8 +338,8 @@ Para adicionar texturas à Fase 2, basta acrescentar novas chaves em `window.ASS
 
 - `cenario_fase1.jpg` é desenhado em painéis de 800×450 ao longo do percurso, com `scrollFactor` horizontal 1 e vertical 0. Se a imagem nova não carregar, `game.js` usa o fundo antigo `fundo_fase1` ou um preenchimento provisório.
 - A câmera usa fundo `#111225` na Fase 1 para evitar que uma borda sem imagem apareça azul.
-- Um overlay escuro tem alpha base 0.14. Em intervalos aleatórios de 900–3600 ms, pisca por 90–240 ms; aproximadamente uma em cada cinco piscadas é mais forte.
-- Uma faixa âmbar semitransparente (`0xc8873a`) no rodapé move-se horizontalmente em tween suave.
+- Um overlay de iluminação escuro cobre o viewport todo, compensando o zoom 0,9 da câmera. Em intervalos aleatórios de 900–3600 ms, pulsa por 90–240 ms com intensidade sutil; aproximadamente uma em cada cinco pulsações é um pouco mais forte.
+- Uma névoa âmbar muito sutil (`0xc8873a`) cobre a tela inteira como overlay fixo e compensa o zoom atual da câmera; sua intensidade pulsa lentamente para não formar uma faixa ou quadrado aparente.
 - O chão usa uma textura repetida e um retângulo Arcade estático. As plataformas têm arte de estante e colisão Arcade sólida; as estantes de obstáculo e caixas das escadas também têm corpos sólidos.
 
 ## Fluxo principal em `game.js`

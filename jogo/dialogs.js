@@ -17,6 +17,6 @@ window.NPC_DIALOGS = {
   2: [
     "Os lasers estão no meu sistema.",
     "Ative o interruptor e eu libero a passagem por alguns segundos.",
-    "Segure Shift para correr nos trechos livres. Observe os lasers e corra!"
+    "Observe o ritmo dos lasers e atravesse quando o caminho estiver livre."
   ]
 };
