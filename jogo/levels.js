@@ -109,11 +109,15 @@ window.LEVELS = [
       { tipo: "confusao", arte: "drone", x: 2400, y: 234, alcance: 110 },
       { tipo: "confusao", arte: "robo", x: 4370, y: 234, alcance: 130 }
     ],
-    coletaveis: [],
     // Checkpoints no começo das salas 2 e 3; y é o centro do marcador.
     checkpoints: [
       { x: 1616, y: 378 },
       { x: 3216, y: 378 }
+    ],
+    // A única dica coletável fica sobre a plataforma antes do técnico de TI.
+    coletaveis: [
+      { tipo: "duvida", x: 3020, y: 229,
+        texto: "Converse com pessoas de outros setores: elas podem trazer informações e perspectivas úteis para o projeto." }
     ],
     // A TI fica perto do interruptor na Sala 3; o diálogo usa NPC_DIALOGS[2].
     npc: { x: 3670, y: 374 },

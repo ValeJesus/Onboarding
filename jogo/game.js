@@ -1559,7 +1559,7 @@ function criarColetaveis(cena, definicoes) {
     sprite.body.setAllowGravity(false);
     sprite.body.setImmovable(true);
 
-    const item = { tipo: definicao.tipo, sprite, brilho, ativo: true };
+    const item = { tipo: definicao.tipo, sprite, brilho, texto: definicao.texto, ativo: true };
     coletaveis.push(item);
     cena.physics.add.overlap(jogador, sprite, () => {
       if (!item.ativo) return;
@@ -1570,7 +1570,8 @@ function criarColetaveis(cena, definicoes) {
       if (item.tipo === "duvida") {
         duvidasColetadas++;
         tocarEfeito("pista");
-        mostrarDica(cena);
+        if (item.texto) mostrarDicaTexto(cena, item.texto);
+        else mostrarDica(cena);
       } else {
         crachasColetados++;
         tocarEfeito("acesso");
@@ -1581,13 +1582,18 @@ function criarColetaveis(cena, definicoes) {
   }
 }
 
-// Exibe uma dica por três segundos sem pausar a cena ou a física.
+// Exibe uma dica sem pausar a cena ou a física.
 function mostrarDica(cena) {
   const dicas = window.DIALOGS || [];
   const dica = dicas.length > 0
     ? dicas[indiceDicaAtual % dicas.length]
     : "Dica";
   indiceDicaAtual++;
+  mostrarDicaTexto(cena, dica);
+}
+
+// Exibe orientações temporárias presas à tela, sem interromper a movimentação.
+function mostrarDicaTexto(cena, dica, duracao = 4500) {
   idDicaAtual++;
   const idAtual = idDicaAtual;
 
@@ -1598,7 +1604,7 @@ function mostrarDica(cena) {
     align: 'center', wordWrap: { width: LARGURA_TELA - 80 }
   }).setOrigin(0.5).setScrollFactor(0).setDepth(1050);
 
-  cena.time.delayedCall(3000, () => {
+  cena.time.delayedCall(duracao, () => {
     // Um timer antigo não deve remover uma dica que acabou de aparecer.
     if (idDicaAtual === idAtual && caixaDica) {
       caixaDica.destroy();
@@ -1609,6 +1615,10 @@ function mostrarDica(cena) {
 
 // Atualiza os dois contadores de itens, mantendo o texto preso à tela.
 function atualizarHUDColetaveis() {
+  if (faseAtual.id === 2) {
+    textoHUDItens.setText(`Dica: ${duvidasColetadas}/${totalDuvidasFase}`);
+    return;
+  }
   const rotuloPistas = faseAtual.id === 1 ? "Pistas" : "Dúvidas";
   const rotuloAcessos = faseAtual.id === 1 ? "Acessos" : "Crachás";
   textoHUDItens.setText(
@@ -1659,7 +1669,17 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
     const pontoRespawn = usarCheckpoint
       ? ultimoCheckpoint
       : { x: 70, y: ALTURA_CHAO - ALTURA_SPRITE_JOGADOR / 2 };
-    jogador.setPosition(pontoRespawn.x, pontoRespawn.y);
+    // Reaplica a pose antes de reposicionar: trocar a textura também muda a
+    // caixa física. Sincronizar a caixa e seu histórico evita que o corpo
+    // continue usando a posição de queda anterior ao respawn.
+    aplicarPoseParado(false);
+    jogador.setPosition(
+      pontoRespawn.x,
+      Math.min(pontoRespawn.y, ALTURA_CHAO - ALTURA_SPRITE_JOGADOR / 2 - 2)
+    );
+    jogador.body.updateFromGameObject();
+    jogador.body.prev.copy(jogador.body.position);
+    jogador.body.prevFrame.copy(jogador.body.position);
     jogador.body.setVelocity(0, 0);
   } else {
     jogador.body.setVelocityX(direcaoEmpurrao * FORCA_EMPURRAO_INIMIGO);
@@ -1675,7 +1695,6 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
   poseCorridaAtiva = false;
   quadroParadoDois = false;
   tempoAnimacaoParado = 0;
-  if (reiniciarNoInicio || usarCheckpoint) aplicarPoseParado(false);
   return true;
 }
 
