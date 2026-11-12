@@ -15,7 +15,7 @@
   --assist: #1b6b73;
   --assist-dark: #15565d;
   /* Foto da assistente: coloque o arquivo em assets/assistente.png (ou troque o caminho aqui). */
-  --assistente: url("assets/assistente.png");
+  --assistente: url("assets/assistente.jpeg");
   /* Silhueta mostrada enquanto não houver foto. */
   --avatar-vazio: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23dfe6ea'/%3E%3Ccircle cx='32' cy='25' r='11' fill='%23a9b6bd'/%3E%3Cpath d='M10 64c2-15 12-22 22-22s20 7 22 22Z' fill='%23a9b6bd'/%3E%3C/svg%3E");
 }
