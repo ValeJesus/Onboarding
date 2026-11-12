@@ -33,12 +33,12 @@
 <section id="aba-slides" class="aba-entrada" hidden>
   <div class="slides">
     <div class="slide-stage">
-      <img id="slide-img" src="assets/slides/slide-1.jpg" alt="Slide 1 de 5">
+      <img id="slide-img" src="assets/slides/slide-1.jpg" alt="Slide 1 de 6">
     </div>
     <div class="slide-nav">
       <button class="btn-icon" type="button" id="slide-prev" title="Slide anterior" aria-label="Slide anterior"><svg class="ico"><use href="#i-prev"/></svg></button>
       <div class="slide-dots" id="slide-dots" role="tablist" aria-label="Slides"></div>
-      <span class="slide-count" id="slide-count">1 / 5</span>
+      <span class="slide-count" id="slide-count">1 / 6</span>
       <button class="btn-icon" type="button" id="slide-full" title="Tela cheia (F)" aria-label="Tela cheia"><svg class="ico"><use href="#i-full"/></svg></button>
       <button class="btn-icon" type="button" id="slide-next" title="Próximo slide" aria-label="Próximo slide"><svg class="ico"><use href="#i-next"/></svg></button>
     </div>
@@ -68,7 +68,7 @@
     $('usuario').value = b.dataset.u; $('senha').value = b.dataset.s; $('senha').focus();
   }));
   /* ---- troca entre Apresentação e Login (mesmo efeito de Análises <-> IA) ---- */
-  const TOTAL = 5; let atual = 1;
+  const TOTAL = 6; let atual = 1;
   const img = $('slide-img');
   $('slide-dots').innerHTML = Array.from({ length: TOTAL }, (_, i) =>
     `<button type="button" role="tab" data-slide="${i + 1}" aria-label="Slide ${i + 1}"></button>`).join('');

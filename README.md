@@ -27,5 +27,5 @@ Localmente, basta dar dois cliques no `index.html`.
 - **Game over:** mensagem "Um passo de cada vez. Estamos juntos nessa!" com o subtítulo "Travou na missão? Acione o SOS e peça reforços!" (`jogo/game.js`).
 - **SOS no assistente:** botão SOS na conversa da Kayla. Ao clicar, o supervisor vê o pedido no topo do painel (`supervisor.html`), com o botão "Marcar como atendido".
 - **Blog (aba Blog):** 3 posts de estagiários fictícios, mais curtidas, comentários e publicação de posts novos. Salvo no `localStorage` e compartilhado entre os usuários do mesmo navegador.
-- **Tela de login com abas:** botões "Apresentação" e "Login" no topo, com troca instantânea (igual a Análises ↔ IA). A apresentação mostra os 5 slides do `Estagiario_Bros_V_Final_1.pptx` (imagens em `assets/slides/`), com setas, bolinhas e teclado ← →. Link direto: `login.html#apresentacao`.
+- **Tela de login com abas:** botões "Apresentação" e "Login" no topo, com troca instantânea (igual a Análises ↔ IA). A apresentação mostra os 6 slides do `Estagiario_Bros_V_Final.pptx + slide de abertura com a equipe` (imagens em `assets/slides/`), com setas, bolinhas e teclado ← →. Link direto: `login.html#apresentacao`.
 - **Tela cheia na apresentação:** botão ao lado das setas (ou tecla F); Esc para sair. Em navegadores sem a API de tela cheia (ex.: iPhone), a apresentação cobre a janela inteira.
