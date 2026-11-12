@@ -342,7 +342,7 @@ function renderTudo() {
 renderTudo();
 
 /* ---------- assistente virtual (widget no canto inferior direito) ---------- */
-const NOME_ASSISTENTE = 'Clara';
+const NOME_ASSISTENTE = 'Kayla';
 const CHAVE_ASSIST = 'gerenciador-assistente-v1';
 const EXEMPLOS = [
   'Quais itens da categoria estudo estão ativos?',
@@ -519,3 +519,86 @@ window.addEventListener('message', (e) => {
   Progresso.registrar(d, SESSAO.usuario);
   renderFaixaJogo();
 });
+
+
+/* ---------- SOS: avisa o supervisor (aparece no painel dele) ---------- */
+$('sos-btn').addEventListener('click', () => {
+  Sos.pedir(SESSAO.usuario, SESSAO.nome);
+  $('sos-btn').disabled = true;
+  $('sos-ok').hidden = false;
+  addMsg('Chamei o seu supervisor! Enquanto ele não chega, pode continuar me perguntando. 💜', 'bot');
+  setTimeout(() => { $('sos-btn').disabled = false; $('sos-ok').hidden = true; }, 8000);
+});
+
+/* ---------- Blog da turma (compartilhado entre os usuários do mesmo navegador) ---------- */
+const CORES_AV = ['#5b34f5', '#1b6b73', '#e09400', '#c0332e', '#1f6fd6', '#0e8a5f'];
+const corAv = (nome) => CORES_AV[[...nome].reduce((a, c) => a + c.charCodeAt(0), 0) % CORES_AV.length];
+const iniciais = (nome) => nome.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
+$('blog-autor').textContent = SESSAO.nome;
+
+function renderBlog() {
+  const posts = Blog.ler();
+  const eu = SESSAO.usuario;
+  $('blog-lista').innerHTML = posts.map((p) => `
+    <article class="card post" data-id="${p.id}">
+      <header class="post-h">
+        <span class="post-av" style="background:${corAv(p.autor)}">${esc(iniciais(p.autor))}</span>
+        <div><b>${esc(p.autor)}</b><small>${esc(p.cargo)} · ${fmtQuando(p.criado)}</small></div>
+      </header>
+      <h3>${esc(p.titulo)}</h3>
+      <p>${esc(p.texto)}</p>
+      <div class="post-acoes">
+        <button type="button" data-blog="curtir" class="${p.curtidas.includes(eu) ? 'on' : ''}">${ico('heart')} ${p.curtidas.length} ${p.curtidas.length === 1 ? 'curtida' : 'curtidas'}</button>
+        <button type="button" data-blog="comentar">${ico('chat')} ${p.comentarios.length} ${p.comentarios.length === 1 ? 'comentário' : 'comentários'}</button>
+      </div>
+      <div class="coments" ${p.aberto ? '' : 'hidden'}>
+        ${p.comentarios.map((c) => `
+          <div class="coment"><span class="post-av" style="background:${corAv(c.autor)}">${esc(iniciais(c.autor))}</span>
+          <div class="coment-b"><b>${esc(c.autor)}</b>${esc(c.texto)}</div></div>`).join('')}
+        <form class="post-form" data-blog="enviar" autocomplete="off">
+          <input maxlength="200" placeholder="Escreva um comentário..." required>
+          <button class="btn-ghost sm" type="submit">Enviar</button>
+        </form>
+      </div>
+    </article>`).join('');
+}
+
+$('blog-lista').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-blog]');
+  if (!b) return;
+  const art = b.closest('.post');
+  const posts = Blog.ler();
+  const p = posts.find((x) => String(x.id) === art.dataset.id);
+  if (!p) return;
+  if (b.dataset.blog === 'curtir') {
+    const i = p.curtidas.indexOf(SESSAO.usuario);
+    if (i >= 0) p.curtidas.splice(i, 1); else p.curtidas.push(SESSAO.usuario);
+    Blog.salvar(posts); renderBlog();
+  } else if (b.dataset.blog === 'comentar') {
+    const c = art.querySelector('.coments');
+    c.hidden = !c.hidden;
+    if (!c.hidden) c.querySelector('input').focus();
+  }
+});
+$('blog-lista').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const art = e.target.closest('.post');
+  const texto = e.target.querySelector('input').value.trim();
+  if (!texto) return;
+  const posts = Blog.ler();
+  const p = posts.find((x) => String(x.id) === art.dataset.id);
+  p.comentarios.push({ autor: SESSAO.nome, texto, t: Date.now() });
+  p.aberto = true;
+  Blog.salvar(posts); renderBlog();
+});
+$('blog-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const titulo = $('blog-titulo').value.trim(), texto = $('blog-texto').value.trim();
+  if (!titulo || !texto) return;
+  const posts = Blog.ler();
+  posts.unshift({ id: Date.now(), autor: SESSAO.nome, cargo: 'Estagiário(a)', titulo, texto, criado: Date.now(), curtidas: [], comentarios: [] });
+  Blog.salvar(posts);
+  $('blog-form').reset();
+  renderBlog();
+});
+renderBlog();

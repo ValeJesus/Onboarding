@@ -147,7 +147,11 @@
         <span class="av">${iniciais(x.nome)}</span><span><b>${esc(x.nome)}</b>
         <small>Jogo ${Progresso.percentual(Progresso.ler(x.usuario))}% · Atividades ${t.filter((i) => i.status === 'concluido').length}/${t.length}</small></span></button>`;
     }).join('');
-    $('painel').innerHTML = `
+    const sos = Sos.ler().filter((x) => !x.atendido).reverse();
+    const faixaSos = sos.length ? `<div class="sos-alerta">${sos.map((x) => `
+      <div><b>🆘 ${esc(x.nome)}</b> pediu ajuda ${fmtQuando(x.t)}
+      <button type="button" class="pill" data-sos="${x.t}">Marcar como atendido</button></div>`).join('')}</div>` : '';
+    $('painel').innerHTML = faixaSos + `
       <div class="sel-colab">${seletor}</div>
       <nav class="tabs sup" aria-label="Seções do supervisor">
         <button class="tab ${aba === 'jogo' ? 'active' : ''}" type="button" data-sup-aba="jogo">${ico('zap')} Progresso no jogo</button>
@@ -157,6 +161,8 @@
   }
 
   $('painel').addEventListener('click', (e) => {
+    const so = e.target.closest('[data-sos]');
+    if (so) { Sos.atender(Number(so.dataset.sos)); render(); return; }
     const c = e.target.closest('[data-colab]'), t = e.target.closest('[data-sup-aba]'), f = e.target.closest('[data-f]');
     if (c) { atual = c.dataset.colab; filtro = ''; try { localStorage.setItem('supervisor-colab', atual); } catch (x) {} }
     else if (t) aba = t.dataset.supAba;

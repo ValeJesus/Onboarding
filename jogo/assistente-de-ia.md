@@ -1,17 +1,17 @@
 # Guia do projeto — jogo de plataforma
 
-Este documento descreve a versão atual do jogo para que outra pessoa ou IA possa entendê-lo e alterá-lo sem depender do histórico da conversa. Leia-o junto com `game.js`, `levels.js`, `dialogs.js`, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js` e `index.html`.
+Este documento descreve a versão atual do jogo para que outra pessoa ou IA possa entendê-lo e alterá-lo sem depender do histórico da conversa. Leia-o junto com `game.js`, `levels.js`, `dialogs.js`, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `assets_npc_dialogo.js` e `index.html`.
 
 ## Visão geral
 
-Jogo de plataforma 2D feito com **Phaser 3.90.0** e **Arcade Physics**. A experiência acompanha um estagiário no primeiro dia em um estúdio de streaming e segue a jornada **reconhecer → planejar → executar → entregar**. A Fase 1, **Observar**, tem inspiração narrativa em Lupin: o estagiário observa rotinas e relações do time, recebe de Marina um guia e coleta pistas sobre como o estúdio funciona. A atmosfera atual usa luz âmbar, bordô e dourado; as Distrações representam a confusão do primeiro dia. A Fase 2, **Executar**, é uma missão de infiltração com lasers, interruptor, cofre, sentinelas robóticas e contagem regressiva. O projeto no cofre pertence ao próprio time e precisa ser recuperado para a entrega no prazo.
+Jogo de plataforma 2D feito com **Phaser 3.90.0** e **Arcade Physics**. A experiência acompanha um estagiário no primeiro dia em um estúdio de streaming e segue a jornada **reconhecer → planejar → executar → entregar**. A Fase 1, **Observar**, tem inspiração narrativa em Lupin: o estagiário observa rotinas e relações do time, recebe de Marina um guia e coleta pistas sobre como o estúdio funciona. A atmosfera atual usa luz âmbar, bordô e dourado; as Distrações representam a confusão do primeiro dia. A Fase 2, **Executar**, é uma missão de infiltração com lasers, interruptor, cofre, sentinelas robóticas e contagem regressiva. O projeto no cofre pertence ao próprio time e precisa ser recuperado para a entrega no prazo. A Fase 3, **Quiz**, verifica os aprendizados das duas fases com perguntas de múltipla escolha sobre observação, comunicação, planejamento, colaboração e segurança.
 
 A entrada atual do jogo é **`index.html`**. O projeto está dividido em arquivos JavaScript, mas pode ser aberto diretamente no navegador sem servidor:
 
 1. `index.html` tenta carregar `phaser.min.js` da mesma pasta.
 2. Se a cópia local falhar, tenta Phaser 3.90.0 por jsDelivr e depois cdnjs.
-3. Carrega `efeitos-audio.js` e depois, em sequência, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `levels.js`, `dialogs.js` e `game.js`.
-4. `game.js` inicia o Phaser depois que as dependências foram carregadas.
+3. Carrega `efeitos-audio.js` e depois, em sequência, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `assets_npc_dialogo.js`, `levels.js`, `dialogs.js` e `game.js`.
+4. `game.js` exibe as telas de início e seleção de **Estagiário Bros**. Depois de clicar em `Jogar`, o jogador escolhe `Observar`, `Executar` ou `Quiz`; então o Phaser inicia na fase escolhida. A tela do Quiz é HTML sobreposta ao canvas para manter os controles de resposta acessíveis.
 
 A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver disponível, o navegador precisa de conexão para usar as CDNs. O canvas se ajusta à janela preservando a proporção 16:9 e a nitidez da pixel art. `jogo-plataforma.html` e `jogo-luz-vermelha-teste.html` são protótipos anteriores; **não são a entrada desta versão**.
 
@@ -25,6 +25,7 @@ A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver 
 | `assets_fase1_novos.js` | Imagens enviadas para a Fase 1 em data URI, compatíveis com abertura direta pelo navegador. |
 | `assets/` | Cenário sem mesas e folhas de quadros dos inimigos aprovados para a Fase 1. Prateleiras e caixas são desenhadas no jogo. |
 | `assets_fase2.js` | Sprites e texturas exclusivos da Fase 2 em data URI, dentro de `window.ASSETS_FASE2`. |
+| `assets_npc_dialogo.js` | Retratos grandes da mentora e do técnico de TI, com fundo verde removido e armazenados em data URI. |
 | `levels.js` | Dados das fases: largura, plataformas, inimigos, coletáveis, lasers, checkpoints, interruptores, cofre, NPC, lição e meta. |
 | `dialogs.js` | Lista de dicas (`window.DIALOGS`) e falas de NPC separadas pelo ID da fase (`window.NPC_DIALOGS`). |
 | `efeitos-audio.js` | Efeitos sonoros originais sintetizados com Web Audio e controle de silêncio. |
@@ -35,15 +36,18 @@ A cópia local do Phaser permite abrir o jogo sem internet. Se ela não estiver 
 
 - **Andar:** setas esquerda/direita ou `A`/`D`.
 - **Pular:** `Espaço` ou seta para cima. Segurar o botão por até 240 ms pode aumentar a altura do salto.
-- **Correr (Fase 2):** segure `Shift` enquanto anda.
 - **Som:** `M` alterna os efeitos sonoros.
+- **Menu inicial:** clique em `Jogar` e escolha `Observar`, `Executar` ou `Quiz` para selecionar a fase de início.
 - **Interruptor (Fase 2):** `E` quando estiver a menos de 80 px e o prompt `[E] Ativar` aparecer.
 - **Diálogo da mentora (Fase 1):** `Espaço` ou `Enter` avança cada fala.
 - **Diálogo da TI (Fase 2):** somente `Enter` avança cada fala.
 - **Lição da fase:** `Enter` fecha a lição e avança para a próxima fase.
+- **Quiz (Fase 3):** escolha uma resposta com o mouse; depois da última pergunta, é possível refazer o quiz ou voltar ao menu.
 - **Game Over:** `Enter` reinicia a fase atual com três vidas.
 
 Na Fase 1, o jogador começa a menos de 80 px da Marina, então a primeira conversa abre logo no início. A conversa pausa a física, o relógio e as animações; os controles de diálogo continuam ativos.
+
+O menu em pixel art é construído em `jogo/index.html` e preenchido por `prepararMenuInicio()` em `game.js`, usando os nomes definidos em `levels.js`. A escolha inicial define `indiceFaseAtual`; concluir uma fase segue para a próxima normalmente, então a Fase 2 avança ao Quiz.
 
 ## Configurações principais (`game.js`)
 
@@ -70,8 +74,6 @@ Os valores ajustáveis estão no topo de `game.js`. Distâncias e velocidades es
 | `CAMERA_ANTECIPACAO_MAXIMA` | 72 | Avanço fixo horizontal da câmera para a direita em relação ao personagem. |
 | `CAMERA_LIMITE_VERTICAL` | 30 | Margem inferior das bordas da câmera; ela permanece fixa no eixo vertical. |
 | `ALTURA_SPRITE_JOGADOR` | 80 | Altura-base do personagem; a câmera da Fase 1 usa zoom 0,9. |
-| `VELOCIDADE_CORRIDA` | 320 | Velocidade máxima ao segurar Shift na Fase 2. |
-| `ACELERACAO_CORRIDA` | 1850 | Aceleração horizontal durante a corrida na Fase 2. |
 | `VIDAS_INICIAIS` | 3 | Vidas ao iniciar e ao reiniciar após Game Over. |
 | `TEMPO_FUGA` | 15000 | Tempo em ms para fugir após pegar o projeto (Fase 2). |
 | `DURACAO_INVENCIBILIDADE_MS` | 1000 | Proteção depois de receber dano. |
@@ -172,6 +174,7 @@ Convenção de coordenadas:
 - **Cofre** em `x=4000`, sobre um pedestal técnico; ao tocar, abre visualmente e revela uma pasta do projeto. A coleta inicia 15 s de fuga com overlay vermelho e HUD de contagem.
 - Durante a fuga, há dois racks técnicos que precisam ser saltados e uma escadaria de cases de equipamento em degraus, com um vão maior no meio. Esses obstáculos originais da Fase 2 ficam entre o cofre e a saída.
 - Meta em `x=4900`. Sem o projeto, a meta exibe aviso e não permite avançar.
+- Lição final “Execução concluída!”: observar lasers para planejar antes de agir; acionar a colega de TI para pedir ajuda e comunicar; usar checkpoint, cofre e fuga para retomar erros e entregar no prazo.
 - Respawn após dano sempre no checkpoint mais recente; fuga reinicia com 15 s a cada respawn no cofre.
 
 ## Textos (`dialogs.js` e `levels.js`)
@@ -253,13 +256,13 @@ Criados por `criarCheckpoints(cena, fase.checkpoints)`. Ao tocar:
 - Tipos aceitos: `duvida` e `cracha`.
 - As imagens embutidas têm 32×32 px; no jogo, dúvidas são exibidas em 40×40 e crachás em 40×48 para destacar melhor os itens.
 - Cada item tem um halo pulsante amarelo (dúvida) ou azul (crachá). Ao coletar, o item e o halo desaparecem.
-- Uma pista (`duvida`) mostra o próximo texto de `window.DIALOGS` por 3 segundos sem pausar o jogo.
+- Uma pista (`duvida`) mostra o texto associado ao item ou, se ele não tiver um texto próprio, o próximo texto de `window.DIALOGS` por 4,5 segundos sem pausar o jogo.
 
 ### NPC
 
-- `npc` define a posição do centro. O sprite da mentora (Fase 1) é exibido a 60×92 px e fica apoiado no chão. O NPC de TI (Fase 2) é exibido a 32×32 px.
+- `npc` define a posição do centro. O sprite da mentora (Fase 1) é exibido a 60×92 px e fica apoiado no chão. O técnico de TI (Fase 2) é exibido a 56×76 px e tem os pés alinhados com a superfície do chão.
 - A conversa abre a menos de 80 px. Cada NPC só inicia sua conversa uma vez por visita à fase.
-- A caixa de diálogo aparece no rodapé. Fase 1: `Espaço` ou `Enter` avança. Fase 2: somente `Enter` avança.
+- A caixa de diálogo aparece no rodapé à esquerda, enquanto o retrato ampliado do NPC surge parcialmente fora da borda direita. Os retratos usam `npc_mentora_dialogo` e `npc_ti_dialogo` de `assets_npc_dialogo.js`; as artes originais ficam menores no cenário. Fase 1: `Espaço` ou `Enter` avança. Fase 2: somente `Enter` avança.
 - Física, relógio e tweens ficam pausados até terminar.
 - As chaves `npc_mentora_1` e `_2` existem. `_2` reutiliza `_1` até ser fornecida uma segunda pose; atualmente a mentora não alterna quadros.
 
@@ -337,8 +340,8 @@ Para adicionar texturas à Fase 2, basta acrescentar novas chaves em `window.ASS
 
 - `cenario_fase1.jpg` é desenhado em painéis de 800×450 ao longo do percurso, com `scrollFactor` horizontal 1 e vertical 0. Se a imagem nova não carregar, `game.js` usa o fundo antigo `fundo_fase1` ou um preenchimento provisório.
 - A câmera usa fundo `#111225` na Fase 1 para evitar que uma borda sem imagem apareça azul.
-- Um overlay escuro tem alpha base 0.14. Em intervalos aleatórios de 900–3600 ms, pisca por 90–240 ms; aproximadamente uma em cada cinco piscadas é mais forte.
-- Uma faixa âmbar semitransparente (`0xc8873a`) no rodapé move-se horizontalmente em tween suave.
+- Um overlay de iluminação escuro cobre o viewport todo, compensando o zoom 0,9 da câmera. Em intervalos aleatórios de 900–3600 ms, pulsa por 90–240 ms com intensidade sutil; aproximadamente uma em cada cinco pulsações é um pouco mais forte.
+- Uma névoa âmbar muito sutil (`0xc8873a`) cobre a tela inteira como overlay fixo e compensa o zoom atual da câmera; sua intensidade pulsa lentamente para não formar uma faixa ou quadrado aparente.
 - O chão usa uma textura repetida e um retângulo Arcade estático. As plataformas têm arte de estante e colisão Arcade sólida; as estantes de obstáculo e caixas das escadas também têm corpos sólidos.
 
 ## Fluxo principal em `game.js`
@@ -347,7 +350,7 @@ Para adicionar texturas à Fase 2, basta acrescentar novas chaves em `window.ASS
 2. `create()` lê `LEVELS[indiceFaseAtual]`, limpa estados temporários e cria o cenário, corpo do jogador, plataformas, chão, fundo, meta, NPC, inimigos, coletáveis, lasers, interruptores, cofre, checkpoints e HUD.
 3. `update(time, delta)` trata primeiro Game Over, painel de lição e diálogo; depois atualiza proximidade do NPC, interruptores, fuga, invencibilidade, patrulhas de inimigos, lasers móveis, colisão da meta, controles, animações do personagem e pulo.
 4. Colisões de chão, plataformas, estantes e caixas usam Arcade Physics; plataformas são sólidas por cima e por baixo. Sobreposições detectam meta, inimigos, lasers, interruptores, cofre, checkpoints e coletáveis.
-5. A meta chama `concluirFase()`. A conclusão só avança com Enter. Na Fase 2, sem o projeto, a meta exibe aviso temporário.
+5. A meta chama `concluirFase()`. A conclusão só avança com Enter. Na Fase 2, sem o projeto, a meta exibe aviso temporário. O Quiz é um tipo de fase separado (`tipo: "quiz"`): `create()` monta a interface HTML e `update()` não processa controles de plataforma enquanto ele está ativo.
 
 ## Como fazer alterações comuns
 
@@ -392,16 +395,13 @@ Use `window.NPC_DIALOGS[idDaFase]` em `dialogs.js` para falas de NPC e `licao: {
 3. Use a chave normalmente em `game.js` com `cena.textures.exists("minha_chave")` para decidir entre a textura e o placeholder.
 4. `preload()` registra automaticamente todas as chaves de `window.ASSETS_FASE2`; nenhuma alteração em `preload()` é necessária.
 
-### Adicionar Fase 3
+### Editar o Quiz
 
-1. Acrescente um objeto com `id: 3` em `window.LEVELS` em `levels.js`.
-2. Adicione falas em `window.NPC_DIALOGS[3]` em `dialogs.js` (se houver NPC).
-3. Se precisar de assets exclusivos, crie `assets_fase3.js` seguindo o padrão de `assets_fase2.js` (`window.ASSETS_FASE3`) e registre-o em `preload()` (ou adapte o loop que já itera `window.ASSETS_FASE2`).
-4. Carregue o novo arquivo de assets no `index.html`, **antes** de `levels.js`.
+As perguntas da Fase 3 ficam no objeto `id: 3`, `tipo: "quiz"` de `window.LEVELS` em `levels.js`. Cada pergunta tem `pergunta`, três `opcoes`, o índice numérico `correta` (começa em zero) e um texto `retorno` mostrado depois da resposta. `mostrarQuiz()` em `game.js` monta a interface e envia o resultado final à plataforma.
 
 ## Cuidados para manutenção
 
-- A ordem dos scripts em `index.html` é obrigatória: `phaser.min.js`, `efeitos-audio.js`, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `levels.js`, `dialogs.js`, `game.js`.
+- A ordem dos scripts em `index.html` é obrigatória: `phaser.min.js`, `efeitos-audio.js`, `assets.js`, `assets_fase1_novos.js`, `assets_fase2.js`, `assets_npc_dialogo.js`, `levels.js`, `dialogs.js`, `game.js`.
 - Não declare de novo um `const` global já declarado em `assets.js`; scripts clássicos compartilham o escopo léxico global.
 - Preserve os nomes de textura usados por `preload()` e por `setTexture()`.
 - Ao mudar escala de uma arte, alinhe os pés e atualize `body.setSize()`/`body.setOffset()` quando a hitbox precisar acompanhar.

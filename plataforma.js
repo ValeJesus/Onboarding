@@ -140,3 +140,45 @@ const Tarefas = {
     return tenta(this.chave(u)) || (u === 'colaborador' ? tenta('gerenciador-itens-v1') : null) || this.exemplos(u);
   }
 };
+
+
+/* Pedidos de SOS: o colaborador aciona no assistente e o supervisor vê no painel. */
+const Sos = {
+  chave: 'gerenciador-sos-v1',
+  ler() { try { const v = JSON.parse(localStorage.getItem(this.chave)); return Array.isArray(v) ? v : []; } catch (e) { return []; } },
+  pedir(usuario, nome) {
+    const l = this.ler(); l.push({ usuario, nome, t: Date.now(), atendido: false });
+    try { localStorage.setItem(this.chave, JSON.stringify(l.slice(-50))); } catch (e) {}
+  },
+  atender(t) {
+    const l = this.ler().map((x) => (x.t === t ? { ...x, atendido: true } : x));
+    try { localStorage.setItem(this.chave, JSON.stringify(l)); } catch (e) {}
+  }
+};
+
+/* Blog da turma: posts de estagiários fictícios + o que os colaboradores publicam. */
+const Blog = {
+  chave: 'gerenciador-blog-v1',
+  exemplos() {
+    const agora = Date.now(), h = 3600000;
+    return [
+      { id: 1, autor: 'Júlia Mendes', cargo: 'Estagiária de Marketing', criado: agora - 2 * h, curtidas: ['colaborador'], aberto: false,
+        titulo: 'Meu primeiro café com o time ☕',
+        texto: 'Cheguei morrendo de vergonha, achando que ia ficar quieta num canto. Aí o pessoal puxou uma cadeira, me perguntou qual era meu café favorito e em dois minutos eu já estava rindo de uma história sobre a máquina de café que só funciona se der um tapinha. Ninguém me cobrou nada, só queriam me conhecer. Saí de lá com a sensação de que já fazia parte da turma.',
+        comentarios: [{ autor: 'Rafael Souza', texto: 'A máquina do tapinha é lendária! Bem-vinda 😄', t: agora - h }] },
+      { id: 2, autor: 'Rafael Souza', cargo: 'Estagiário de Tecnologia', criado: agora - 7 * h, curtidas: [], aberto: false,
+        titulo: 'Quebrei o ambiente de teste (e ninguém me crucificou)',
+        texto: 'Hoje de manhã apaguei sem querer uma configuração do ambiente de teste e já me preparei pro pior. Avisei meu supervisor com o coração na mão. A resposta? "Acontece, vem cá que a gente arruma junto". Em 15 minutos estava tudo no ar e ainda aprendi um jeito de evitar isso. Errar aqui parece fazer parte de aprender.',
+        comentarios: [{ autor: 'Júlia Mendes', texto: 'Esse é o melhor tipo de supervisor. Quase me deu vontade de quebrar algo também, brincadeira!', t: agora - 5 * h }] },
+      { id: 3, autor: 'Camila Duarte', cargo: 'Estagiária de RH', criado: agora - 26 * h, curtidas: [], aberto: false,
+        titulo: 'Sexta de almoço coletivo 🍕',
+        texto: 'Descobri que toda sexta o pessoal pede pizza e come junto na copa, e que estagiário não paga nada na primeira vez. Sentei ao lado de gente de três áreas diferentes, ouvi dicas de carreira e ainda ganhei indicação de um curso. Sem hierarquia na mesa, só conversa boa. Já estou ansiosa pela próxima.',
+        comentarios: [] }
+    ];
+  },
+  ler() {
+    try { const v = JSON.parse(localStorage.getItem(this.chave)); if (Array.isArray(v)) return v; } catch (e) {}
+    return this.exemplos();
+  },
+  salvar(l) { try { localStorage.setItem(this.chave, JSON.stringify(l)); } catch (e) {} }
+};

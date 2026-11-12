@@ -45,9 +45,6 @@ const ALTURA_ARTE_JOGADOR = 961;
 const LARGURA_ARTE_PARADO_2 = 248;
 const ALTURA_ARTE_PARADO_2 = 612;
 const INTERVALO_ANIMACAO_PARADO = 750;
-const VELOCIDADE_CORRIDA = 320;
-const ACELERACAO_CORRIDA = 1850;
-const INTERVALO_ANIMACAO_CORRIDA_RAPIDA = 88;
 const CAMERA_ANTECIPACAO_MAXIMA = 72;
 const CAMERA_LIMITE_VERTICAL = 30;
 const FASES = window.LEVELS;
@@ -81,12 +78,161 @@ function avisarPlataforma(dados) {
 function iniciarJogo() {
   if (jogoIniciado) return;
   if (!window.Phaser) {
-    document.getElementById("aviso").textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
+    const aviso = document.getElementById("aviso");
+    if (aviso) aviso.textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
     return;
   }
   jogoIniciado = true;
-  document.getElementById("aviso").remove();
+  const aviso = document.getElementById("aviso");
+  if (aviso) aviso.remove();
   new Phaser.Game(config);
+}
+
+function prepararMenuInicio() {
+  const menu = document.getElementById("menu-inicial");
+  const telaInicio = document.getElementById("tela-inicio");
+  const telaSelecao = document.getElementById("tela-selecao");
+  const listaFases = document.getElementById("lista-fases");
+  const aviso = document.getElementById("aviso");
+  if (!menu || !telaInicio || !telaSelecao || !listaFases) {
+    iniciarJogo();
+    return;
+  }
+
+  const descricoes = {
+    1: "Observar — reconheça o estúdio e descubra como o time trabalha.",
+    2: "Executar — atravesse a segurança e recupere o projeto do time.",
+    3: "Quiz — teste o que aprendeu sobre o time, o planejamento e a missão."
+  };
+  FASES.forEach((fase, indice) => {
+    const botao = document.createElement("button");
+    botao.className = `fase-botao${fase.tipo === "quiz" ? " fase-quiz" : ""}`;
+    botao.type = "button";
+    const numero = document.createElement("span");
+    numero.className = "fase-numero";
+    numero.textContent = String(fase.id || indice + 1);
+    const texto = document.createElement("span");
+    texto.className = "fase-texto";
+    const nome = document.createElement("strong");
+    nome.textContent = fase.nome || `Fase ${indice + 1}`;
+    const descricao = document.createElement("small");
+    descricao.textContent = descricoes[fase.id] || "Continue sua jornada de onboarding.";
+    texto.append(nome, descricao);
+    botao.append(numero, texto);
+    botao.addEventListener("click", () => {
+      if (!window.Phaser) {
+        if (aviso) aviso.textContent = "Phaser não carregou. Verifique sua conexão com a internet.";
+        return;
+      }
+      indiceFaseAtual = indice;
+      menu.hidden = true;
+      iniciarJogo();
+    });
+    listaFases.appendChild(botao);
+  });
+
+  document.getElementById("botao-jogar")?.addEventListener("click", () => {
+    telaInicio.hidden = true;
+    telaSelecao.hidden = false;
+    listaFases.querySelector("button")?.focus();
+  });
+  document.getElementById("botao-voltar")?.addEventListener("click", () => {
+    telaSelecao.hidden = true;
+    telaInicio.hidden = false;
+    document.getElementById("botao-jogar")?.focus();
+  });
+
+  if (window.Phaser && aviso) aviso.remove();
+}
+
+function mostrarQuiz(fase) {
+  const tela = document.getElementById("quiz-tela");
+  if (!tela) throw new Error("A tela do quiz não existe no index.html");
+  const progresso = document.getElementById("quiz-progresso");
+  const pergunta = document.getElementById("quiz-pergunta");
+  const opcoes = document.getElementById("quiz-opcoes");
+  const retorno = document.getElementById("quiz-retorno");
+  const avancar = document.getElementById("quiz-avancar");
+  const titulo = document.getElementById("quiz-titulo");
+  const placar = document.getElementById("quiz-placar");
+  let indice = 0;
+  let acertos = 0;
+  let respondeu = false;
+
+  tela.hidden = false;
+  titulo.textContent = "Quiz";
+
+  function desenharPergunta() {
+    respondeu = false;
+    const atual = fase.quiz[indice];
+    progresso.textContent = `PERGUNTA ${indice + 1} / ${fase.quiz.length}`;
+    placar.textContent = `ACERTOS ${acertos}`;
+    pergunta.textContent = atual.pergunta;
+    retorno.textContent = "Escolha uma resposta para continuar.";
+    retorno.className = "quiz-retorno";
+    opcoes.replaceChildren();
+    atual.opcoes.forEach((texto, opcaoIndice) => {
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "quiz-opcao";
+      botao.textContent = texto;
+      botao.addEventListener("click", () => {
+        if (respondeu) return;
+        respondeu = true;
+        const acertou = opcaoIndice === atual.correta;
+        if (acertou) acertos++;
+        [...opcoes.children].forEach((item, itemIndice) => {
+          item.disabled = true;
+          if (itemIndice === atual.correta) item.classList.add("correta");
+          else if (itemIndice === opcaoIndice) item.classList.add("incorreta");
+        });
+        retorno.textContent = `${acertou ? "Boa! " : `A resposta certa é: ${atual.opcoes[atual.correta]}. `}${atual.retorno}`;
+        retorno.className = `quiz-retorno ${acertou ? "retorno-correto" : "retorno-incorreto"}`;
+        avancar.hidden = false;
+        avancar.textContent = indice + 1 === fase.quiz.length ? "Ver resultado" : "Próxima pergunta";
+      });
+      opcoes.appendChild(botao);
+    });
+    avancar.hidden = true;
+  }
+
+  avancar.onclick = () => {
+    indice++;
+    if (indice < fase.quiz.length) {
+      desenharPergunta();
+      return;
+    }
+    const total = fase.quiz.length;
+    const percentual = Math.round(acertos / total * 100);
+    progresso.textContent = "MISSÃO DE ONBOARDING CONCLUÍDA";
+    placar.textContent = `RESULTADO ${acertos} / ${total}`;
+    pergunta.textContent = percentual >= 80
+      ? "Excelente! Você está pronto para observar, colaborar e executar com o time."
+      : "Você concluiu o quiz. Relembre as lições e tente novamente para fixar os aprendizados.";
+    opcoes.replaceChildren();
+    retorno.textContent = "Observar, planejar, comunicar e pedir apoio fazem parte de uma boa entrega.";
+    retorno.className = "quiz-retorno retorno-correto";
+    avancar.hidden = true;
+    document.getElementById("quiz-refazer").hidden = false;
+    document.getElementById("quiz-menu").hidden = false;
+    avisarPlataforma({
+      tipo: 'fase_concluida', fase: fase.id, vidas: VIDAS_INICIAIS,
+      duracaoMs: Date.now() - inicioTentativa, duvidas: 0, crachas: 0,
+      acertos, totalPerguntas: total, ultima: true
+    });
+  };
+
+  document.getElementById("quiz-refazer").onclick = () => {
+    indice = 0;
+    acertos = 0;
+    document.getElementById("quiz-refazer").hidden = true;
+    document.getElementById("quiz-menu").hidden = true;
+    desenharPergunta();
+  };
+  document.getElementById("quiz-menu").onclick = () => window.location.reload();
+  document.getElementById("quiz-refazer").hidden = true;
+  document.getElementById("quiz-menu").hidden = true;
+  desenharPergunta();
 }
 
 let jogador;
@@ -100,6 +246,8 @@ let textoGameOver;
 let caixaDica;
 let caixaDialogoNPC;
 let textoDialogoNPC;
+let retratoDialogoNPC;
+let caudaDialogoNPC;
 let caixaPainelLicao;
 let fundoPainelLicao;
 let textoTituloLicao;
@@ -171,6 +319,10 @@ function preload() {
   this.load.image("porta_meta", SPRITE_PORTA_META);
   this.load.image("npc_mentora_1", SPRITE_NPC_MENTORA_1);
   this.load.image("npc_mentora_2", SPRITE_NPC_MENTORA_2);
+  if (window.NPC_DIALOGUE_ASSETS) {
+    this.load.image("npc_mentora_dialogo", window.NPC_DIALOGUE_ASSETS.mentora);
+    this.load.image("npc_ti_dialogo", window.NPC_DIALOGUE_ASSETS.tecnico);
+  }
   SPRITES_CORRIDA.forEach((imagem, indice) => this.load.image("spriteCorrida" + indice, imagem));
   this.load.image("spriteSubida", SPRITE_SUBIDA);
   this.load.image("spriteQueda", SPRITE_QUEDA);
@@ -252,6 +404,19 @@ function create() {
   if (!fase) throw new Error("A fase solicitada não existe em levels.js");
   faseAtual = fase;
 
+  if (fase.tipo === "quiz") {
+    concluiu = false;
+    gameOver = false;
+    inicioTentativa = Date.now();
+    avisarPlataforma({
+      tipo: 'fase_inicio', fase: fase.id, nome: fase.nome,
+      totalFases: FASES.length, temCofre: false, totalDuvidas: 0,
+      totalCrachas: 0, totalCheckpoints: 0
+    });
+    mostrarQuiz(fase);
+    return;
+  }
+
   // Cada fase começa com estados e animações limpos, sem alterar a física.
   concluiu = false;
   gameOver = false;
@@ -262,6 +427,10 @@ function create() {
   tempoPiscarInvencibilidade = 0;
   jogadorVisivelDuranteDano = true;
   npcSprite = null;
+  caixaDialogoNPC = null;
+  textoDialogoNPC = null;
+  retratoDialogoNPC = null;
+  caudaDialogoNPC = null;
   falasNPC = [];
   indiceFalaNPC = 0;
   dialogoNPCAtivo = false;
@@ -364,7 +533,7 @@ function create() {
   jogador.body.setSize(LARGURA_ARTE_JOGADOR * 0.70, ALTURA_ARTE_JOGADOR * 0.90, false);
   jogador.body.setOffset(LARGURA_ARTE_JOGADOR * 0.15, ALTURA_ARTE_JOGADOR * 0.10);
   jogador.body.setCollideWorldBounds(true);
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
 
   // Objetos estáticos tornam as plataformas imóveis e compatíveis com colisões Arcade.
   plataformas = cena.physics.add.staticGroup();
@@ -424,12 +593,16 @@ function create() {
   criarInimigos(cena, fase.inimigos || []);
   // Instancia itens cadastrados e prepara seus contadores no HUD.
   criarColetaveis(cena, fase.coletaveis || []);
-  // A TI usa a imagem enviada (32x32); a Fase 1 mantém o retrato da Marina.
+  // A TI usa a imagem fornecida ampliada e alinhada pelo chão; Fase 1 mantém a arte da Marina.
   if (fase.npc) {
     if (fase.id === 2) {
+      const larguraTecnico = 56;
+      const alturaTecnico = 76;
+      const yTecnico = fase.npc.y - (alturaTecnico - 32) / 2;
       npcSprite = cena.textures.exists("npc_ti_1")
-        ? cena.add.image(fase.npc.x, fase.npc.y, "npc_ti_1").setDisplaySize(32, 32).setDepth(5)
-        : cena.add.rectangle(fase.npc.x, fase.npc.y, 32, 32, 0x3183d4).setDepth(5);
+        ? cena.add.image(fase.npc.x, yTecnico, "npc_ti_1")
+          .setDisplaySize(larguraTecnico, alturaTecnico).setDepth(5)
+        : cena.add.rectangle(fase.npc.x, yTecnico, larguraTecnico, alturaTecnico, 0x3183d4).setDepth(5);
     } else {
       npcSprite = cena.add.image(fase.npc.x, fase.npc.y, "npc_mentora_1")
         .setDisplaySize(LARGURA_NPC_TELA, ALTURA_NPC_TELA)
@@ -454,7 +627,7 @@ function create() {
   }).setScrollFactor(0).setDepth(1000);
   atualizarHUDColetaveis();
   cena.add.text(20, ALTURA_TELA - 12,
-    fase.id === 2 ? '[Shift] Correr   [M] Som' : '[M] Som',
+    '[M] Som',
     { fontFamily: 'sans-serif', fontSize: '13px', color: '#f3dfb2',
       stroke: '#172033', strokeThickness: 3 }
   ).setOrigin(0, 1).setScrollFactor(0).setDepth(1000);
@@ -489,7 +662,6 @@ function create() {
     espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
     enter: Phaser.Input.Keyboard.KeyCodes.ENTER,
     e: Phaser.Input.Keyboard.KeyCodes.E,
-    shift: Phaser.Input.Keyboard.KeyCodes.SHIFT,
     mudo: Phaser.Input.Keyboard.KeyCodes.M
   });
   if (window.EFEITOS_JOGO) {
@@ -498,6 +670,8 @@ function create() {
 }
 
 function update(time, delta) {
+  if (faseAtual && faseAtual.tipo === "quiz") return;
+
   if (Phaser.Input.Keyboard.JustDown(teclas.mudo)) {
     const somAtivo = window.EFEITOS_JOGO
       ? window.EFEITOS_JOGO.alternarSilencio() : false;
@@ -642,11 +816,10 @@ function update(time, delta) {
   const esquerda = teclas.esquerda.isDown || teclas.a.isDown;
   const direita = teclas.direita.isDown || teclas.d.isDown;
   const direcao = esquerda === direita ? 0 : (esquerda ? -1 : 1);
-  const corridaAtiva = faseAtual.id === 2 && teclas.shift.isDown && direcao !== 0;
-  let aceleracaoAtual = corridaAtiva ? ACELERACAO_CORRIDA : ACELERACAO_JOGADOR;
+  let aceleracaoAtual = ACELERACAO_JOGADOR;
   const velocidadeXAtual = jogador.body.velocity.x;
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
-  if (!corridaAtiva && direcao !== 0 && Math.sign(velocidadeXAtual) === direcao &&
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
+  if (direcao !== 0 && Math.sign(velocidadeXAtual) === direcao &&
       Math.abs(velocidadeXAtual) >= VELOCIDADE_JOGADOR) {
     aceleracaoAtual = 0;
     if (Math.abs(velocidadeXAtual) > VELOCIDADE_JOGADOR) {
@@ -690,9 +863,7 @@ function update(time, delta) {
         aplicarPoseCorrida(quadroCorridaAtual);
       } else {
         tempoAnimacaoCorrida += delta;
-        const intervaloCorrida = corridaAtiva
-          ? INTERVALO_ANIMACAO_CORRIDA_RAPIDA : INTERVALO_ANIMACAO_CORRIDA;
-        if (tempoAnimacaoCorrida >= intervaloCorrida) {
+        if (tempoAnimacaoCorrida >= INTERVALO_ANIMACAO_CORRIDA) {
           tempoAnimacaoCorrida = 0;
           quadroCorridaAtual = (quadroCorridaAtual + 1) % SPRITES_CORRIDA.length;
           aplicarPoseCorrida(quadroCorridaAtual);
@@ -984,9 +1155,11 @@ function criarEfeitosFase1(cena, fase) {
       .setScrollFactor(0.3, 0).setDepth(-100);
   }
 
-  // Oscila o alpha em intervalos aleatórios; algumas piscadas ficam mais fortes.
+  // A luz ambiente oscila em toda a tela; o tamanho compensa o zoom da câmera.
+  const zoomCamera = cena.cameras.main.zoom || 1;
   const overlayEscuro = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
-    LARGURA_TELA, ALTURA_TELA, 0x05070d, 0.14)
+    LARGURA_TELA / zoomCamera + 4, ALTURA_TELA / zoomCamera + 4,
+    0x05070d, 0.1)
     .setScrollFactor(0).setDepth(50);
   const agendarPisca = () => {
     if (!overlayEscuro.active) return;
@@ -994,25 +1167,26 @@ function criarEfeitosFase1(cena, fase) {
       if (!overlayEscuro.active) return;
       const piscadaForte = Math.random() < 0.2;
       overlayEscuro.setFillStyle(0x05070d, piscadaForte
-        ? Phaser.Math.FloatBetween(0.48, 0.66)
-        : Phaser.Math.FloatBetween(0.22, 0.38));
+        ? Phaser.Math.FloatBetween(0.3, 0.38)
+        : Phaser.Math.FloatBetween(0.15, 0.22));
       cena.time.delayedCall(Phaser.Math.Between(90, 240), () => {
         if (!overlayEscuro.active) return;
-        overlayEscuro.setFillStyle(0x05070d, 0.14);
+        overlayEscuro.setFillStyle(0x05070d, 0.1);
         agendarPisca();
       });
     });
   };
   agendarPisca();
 
-  // A faixa é mais larga que a tela para se mover sem revelar as bordas.
-  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 42,
-    LARGURA_TELA + 100, 110, 0xc8873a, 0.22)
+  // O overlay é fixo na tela e compensa o zoom para cobrir todo o viewport.
+  const nevoaAmbar = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2,
+    LARGURA_TELA / zoomCamera + 4, ALTURA_TELA / zoomCamera + 4,
+    0xc8873a, 0.035)
     .setScrollFactor(0).setDepth(60);
   cena.tweens.add({
     targets: nevoaAmbar,
-    x: LARGURA_TELA / 2 + 34,
-    duration: 4200,
+    alpha: { from: 0.025, to: 0.055 },
+    duration: 5200,
     ease: 'Sine.easeInOut',
     yoyo: true,
     repeat: -1
@@ -1501,7 +1675,7 @@ function criarColetaveis(cena, definicoes) {
     sprite.body.setAllowGravity(false);
     sprite.body.setImmovable(true);
 
-    const item = { tipo: definicao.tipo, sprite, brilho, ativo: true };
+    const item = { tipo: definicao.tipo, sprite, brilho, texto: definicao.texto, ativo: true };
     coletaveis.push(item);
     cena.physics.add.overlap(jogador, sprite, () => {
       if (!item.ativo) return;
@@ -1512,7 +1686,8 @@ function criarColetaveis(cena, definicoes) {
       if (item.tipo === "duvida") {
         duvidasColetadas++;
         tocarEfeito("pista");
-        mostrarDica(cena);
+        if (item.texto) mostrarDicaTexto(cena, item.texto);
+        else mostrarDica(cena);
       } else {
         crachasColetados++;
         tocarEfeito("acesso");
@@ -1523,13 +1698,18 @@ function criarColetaveis(cena, definicoes) {
   }
 }
 
-// Exibe uma dica por três segundos sem pausar a cena ou a física.
+// Exibe uma dica sem pausar a cena ou a física.
 function mostrarDica(cena) {
   const dicas = window.DIALOGS || [];
   const dica = dicas.length > 0
     ? dicas[indiceDicaAtual % dicas.length]
     : "Dica";
   indiceDicaAtual++;
+  mostrarDicaTexto(cena, dica);
+}
+
+// Exibe orientações temporárias presas à tela, sem interromper a movimentação.
+function mostrarDicaTexto(cena, dica, duracao = 4500) {
   idDicaAtual++;
   const idAtual = idDicaAtual;
 
@@ -1540,7 +1720,7 @@ function mostrarDica(cena) {
     align: 'center', wordWrap: { width: LARGURA_TELA - 80 }
   }).setOrigin(0.5).setScrollFactor(0).setDepth(1050);
 
-  cena.time.delayedCall(3000, () => {
+  cena.time.delayedCall(duracao, () => {
     // Um timer antigo não deve remover uma dica que acabou de aparecer.
     if (idDicaAtual === idAtual && caixaDica) {
       caixaDica.destroy();
@@ -1551,6 +1731,10 @@ function mostrarDica(cena) {
 
 // Atualiza os dois contadores de itens, mantendo o texto preso à tela.
 function atualizarHUDColetaveis() {
+  if (faseAtual.id === 2) {
+    textoHUDItens.setText(`Dica: ${duvidasColetadas}/${totalDuvidasFase}`);
+    return;
+  }
   const rotuloPistas = faseAtual.id === 1 ? "Pistas" : "Dúvidas";
   const rotuloAcessos = faseAtual.id === 1 ? "Acessos" : "Crachás";
   textoHUDItens.setText(
@@ -1583,14 +1767,22 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
     gameOver = true;
     avisarPlataforma({ tipo: 'game_over', fase: faseAtual.id });
     jogador.body.enable = false;
-    textoGameOver = cena.add.text(
-      LARGURA_TELA / 2,
-      ALTURA_TELA / 2,
-      'Game Over\nPressione Enter para tentar de novo',
-      { fontFamily: 'sans-serif', fontSize: '30px', color: '#ffffff',
-        align: 'center', lineSpacing: 12,
-        backgroundColor: '#172033', padding: { x: 22, y: 16 } }
-    ).setOrigin(0.5).setScrollFactor(0).setDepth(1100);
+    // Mensagem acolhedora: título, subtítulo (SOS) e a instrução para recomeçar.
+    const painelGO = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA / 2, Math.min(LARGURA_TELA - 60, 760), 230, 0x172033, 0.96)
+      .setScrollFactor(0).setDepth(1100).setStrokeStyle(3, 0x5b34f5);
+    const tituloGO = cena.add.text(LARGURA_TELA / 2, ALTURA_TELA / 2 - 62,
+      'Um passo de cada vez.\nEstamos juntos nessa!',
+      { fontFamily: 'sans-serif', fontSize: '30px', fontStyle: 'bold', color: '#ffffff', align: 'center', lineSpacing: 6 }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1101);
+    const subGO = cena.add.text(LARGURA_TELA / 2, ALTURA_TELA / 2 + 22,
+      'Travou na missão? Acione o SOS e peça reforços!',
+      { fontFamily: 'sans-serif', fontSize: '20px', color: '#ffd166', align: 'center' }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1101);
+    const dicaGO = cena.add.text(LARGURA_TELA / 2, ALTURA_TELA / 2 + 80,
+      'Pressione Enter para tentar de novo',
+      { fontFamily: 'sans-serif', fontSize: '16px', color: '#c9d1e3', align: 'center' }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1101);
+    textoGameOver = cena.add.container(0, 0, [painelGO, tituloGO, subGO, dicaGO]).setScrollFactor(0).setDepth(1100);
     jogador.setAlpha(1);
     return true;
   }
@@ -1601,7 +1793,17 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
     const pontoRespawn = usarCheckpoint
       ? ultimoCheckpoint
       : { x: 70, y: ALTURA_CHAO - ALTURA_SPRITE_JOGADOR / 2 };
-    jogador.setPosition(pontoRespawn.x, pontoRespawn.y);
+    // Reaplica a pose antes de reposicionar: trocar a textura também muda a
+    // caixa física. Sincronizar a caixa e seu histórico evita que o corpo
+    // continue usando a posição de queda anterior ao respawn.
+    aplicarPoseParado(false);
+    jogador.setPosition(
+      pontoRespawn.x,
+      Math.min(pontoRespawn.y, ALTURA_CHAO - ALTURA_SPRITE_JOGADOR / 2 - 2)
+    );
+    jogador.body.updateFromGameObject();
+    jogador.body.prev.copy(jogador.body.position);
+    jogador.body.prevFrame.copy(jogador.body.position);
     jogador.body.setVelocity(0, 0);
   } else {
     jogador.body.setVelocityX(direcaoEmpurrao * FORCA_EMPURRAO_INIMIGO);
@@ -1612,12 +1814,11 @@ function perderVida(cena, direcaoEmpurrao = 0, reiniciarNoInicio = false) {
   }
   jogador.body.setAcceleration(0, 0);
   jogador.body.setGravityY(0);
-  jogador.body.setMaxVelocity(VELOCIDADE_CORRIDA, VELOCIDADE_MAXIMA_QUEDA);
+  jogador.body.setMaxVelocity(VELOCIDADE_JOGADOR, VELOCIDADE_MAXIMA_QUEDA);
   poseNoArAtual = '';
   poseCorridaAtiva = false;
   quadroParadoDois = false;
   tempoAnimacaoParado = 0;
-  if (reiniciarNoInicio || usarCheckpoint) aplicarPoseParado(false);
   return true;
 }
 
@@ -1673,13 +1874,28 @@ function iniciarDialogoNPC(cena) {
   dialogoNPCAtivo = true;
   jogador.body.setVelocity(0, 0);
   jogador.body.setAcceleration(0, 0);
-  caixaDialogoNPC = cena.add.rectangle(LARGURA_TELA / 2, ALTURA_TELA - 66,
-    LARGURA_TELA - 56, 112, 0x111827, 0.94)
+  caixaDialogoNPC = cena.add.rectangle(285, ALTURA_TELA - 98,
+    520, 166, 0x111827, 0.98)
+    .setStrokeStyle(3, 0xc89b59, 1)
     .setScrollFactor(0).setDepth(1100);
-  textoDialogoNPC = cena.add.text(48, ALTURA_TELA - 112,
-    `${falasNPC[indiceFalaNPC]}\n\nEspaço ou Enter para avançar`,
-    { fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff',
-      lineSpacing: 4, wordWrap: { width: LARGURA_TELA - 96 } })
+  caudaDialogoNPC = cena.add.triangle(550, ALTURA_TELA - 98,
+    0, 0, 34, 18, 0, 36, 0x111827, 0.98)
+    .setStrokeStyle(3, 0xc89b59, 1)
+    .setScrollFactor(0).setDepth(1100);
+  const chaveRetrato = faseAtual.id === 2 ? "npc_ti_dialogo" : "npc_mentora_dialogo";
+  if (cena.textures.exists(chaveRetrato)) {
+    const fonte = cena.textures.get(chaveRetrato).getSourceImage();
+    const escalaRetrato = Math.min(330 / fonte.width, 410 / fonte.height);
+    retratoDialogoNPC = cena.add.image(748, ALTURA_TELA + 40, chaveRetrato)
+      .setScale(escalaRetrato).setOrigin(0.5, 1)
+      .setScrollFactor(0).setDepth(1099);
+    if (faseAtual.id === 1) retratoDialogoNPC.setFlipX(true);
+  }
+  const controleAvanco = faseAtual.id === 2 ? "Enter" : "Espaço ou Enter";
+  textoDialogoNPC = cena.add.text(48, ALTURA_TELA - 148,
+    `${falasNPC[indiceFalaNPC]}\n\n[${controleAvanco}] para avançar`,
+    { fontFamily: 'sans-serif', fontSize: '19px', color: '#ffffff',
+      lineSpacing: 5, wordWrap: { width: 460 } })
     .setScrollFactor(0).setDepth(1101);
   cena.physics.world.pause();
   cena.time.paused = true;
@@ -1693,18 +1909,21 @@ function avancarDialogoNPC(cena) {
     dialogoNPCAtivo = false;
     caixaDialogoNPC.destroy();
     textoDialogoNPC.destroy();
+    if (retratoDialogoNPC) retratoDialogoNPC.destroy();
+    if (caudaDialogoNPC) caudaDialogoNPC.destroy();
     caixaDialogoNPC = null;
     textoDialogoNPC = null;
+    retratoDialogoNPC = null;
+    caudaDialogoNPC = null;
     cena.physics.world.resume();
     cena.time.paused = false;
     cena.tweens.resumeAll();
     return;
   }
 
-  textoDialogoNPC.setText(
-    `${falasNPC[indiceFalaNPC]}\n\nEspaço ou Enter para avançar`
-  );
+  const controleAvanco = faseAtual.id === 2 ? "Enter" : "Espaço ou Enter";
+  textoDialogoNPC.setText(`${falasNPC[indiceFalaNPC]}\n\n[${controleAvanco}] para avançar`);
 }
-// O index.html carrega Phaser e assets.js antes de iniciar o jogo.
-iniciarJogo();
+// O jogador escolhe uma fase no menu antes de criar a cena Phaser.
+prepararMenuInicio();
 

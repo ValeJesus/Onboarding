@@ -109,11 +109,15 @@ window.LEVELS = [
       { tipo: "confusao", arte: "drone", x: 2400, y: 234, alcance: 110 },
       { tipo: "confusao", arte: "robo", x: 4370, y: 234, alcance: 130 }
     ],
-    coletaveis: [],
     // Checkpoints no começo das salas 2 e 3; y é o centro do marcador.
     checkpoints: [
       { x: 1616, y: 378 },
       { x: 3216, y: 378 }
+    ],
+    // A única dica coletável fica sobre a plataforma antes do técnico de TI.
+    coletaveis: [
+      { tipo: "duvida", x: 3020, y: 229,
+        texto: "Converse com pessoas de outros setores: elas podem trazer informações e perspectivas úteis para o projeto." }
     ],
     // A TI fica perto do interruptor na Sala 3; o diálogo usa NPC_DIALOGS[2].
     npc: { x: 3670, y: 374 },
@@ -168,7 +172,82 @@ window.LEVELS = [
     ],
     // O cofre fica logo após o corredor; os obstáculos do retorno ficam no trecho até a saída.
     cofre: { x: 4000, y: 358 },
+    licao: {
+      titulo: "Execução concluída!",
+      itens: [
+        "Observar lasers — Planejar antes de agir",
+        "Acionar colega de TI — Pedir ajuda e comunicar",
+        "Checkpoint, cofre e fuga — Retomar erros e entregar no prazo"
+      ]
+    },
     // A saída é desenhada como um retângulo verde pela lógica do jogo.
     meta: { x: 4900, y: 358 }
+  },
+  {
+    id: 3,
+    nome: "Quiz",
+    tipo: "quiz",
+    quiz: [
+      {
+        pergunta: "No primeiro dia, qual é a melhor forma de entender como o time trabalha?",
+        opcoes: [
+          "Observar as rotinas e como as pessoas se comunicam",
+          "Mudar o processo antes de conhecer o time",
+          "Esperar que alguém explique tudo sem perguntar"
+        ],
+        correta: 0,
+        retorno: "Observar primeiro ajuda a entender o contexto e escolher como contribuir."
+      },
+      {
+        pergunta: "Você não sabe quem pode responder uma dúvida do projeto. O que fazer?",
+        opcoes: [
+          "Adivinhar para terminar mais rápido",
+          "Perguntar e anotar o que aprender",
+          "Deixar a dúvida para o último momento"
+        ],
+        correta: 1,
+        retorno: "Perguntar às pessoas certas e registrar a resposta reduz retrabalho."
+      },
+      {
+        pergunta: "Você percebe que cometeu um erro que pode atrasar uma entrega. Como agir?",
+        opcoes: [
+          "Esconder o erro até conseguir resolver sozinho",
+          "Avisar a equipe cedo, explicar o impacto e combinar os próximos passos",
+          "Esperar alguém notar"
+        ],
+        correta: 1,
+        retorno: "Comunicar cedo permite que o time ajude e reorganize o plano."
+      },
+      {
+        pergunta: "Os lasers de segurança estão alternando. Como atravessar?",
+        opcoes: [
+          "Observar o ciclo e avançar quando houver uma janela segura",
+          "Correr sem olhar para o padrão",
+          "Pular repetidamente no mesmo lugar"
+        ],
+        correta: 0,
+        retorno: "Observar o ritmo e planejar o momento da travessia evita riscos."
+      },
+      {
+        pergunta: "Um bloqueio técnico impede seu progresso. Qual atitude ajuda mais?",
+        opcoes: [
+          "Pedir apoio à TI e explicar o que você já tentou",
+          "Continuar tentando em silêncio, mesmo sem avançar",
+          "Mudar configurações sem avisar ninguém"
+        ],
+        correta: 0,
+        retorno: "Pedir ajuda com contexto facilita a colaboração e acelera a solução."
+      },
+      {
+        pergunta: "Você precisa de informação que está em outro setor. O que fazer?",
+        opcoes: [
+          "Evitar contato e trabalhar com suposições",
+          "Conversar com as pessoas do setor e explicar o que precisa",
+          "Esperar que elas descubram o problema"
+        ],
+        correta: 1,
+        retorno: "Colaborar entre setores traz outras perspectivas e informações úteis."
+      }
+    ]
   }
 ];

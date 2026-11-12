@@ -43,6 +43,7 @@
     <symbol id="i-plane" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
     <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><rect x="2" y="6" width="20" height="12" rx="5"/></symbol>
     <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-life" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="m5.6 5.6 3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></symbol>
     <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
   </defs>
 </svg>
@@ -69,6 +70,7 @@
     <button class="tab" type="button" data-aba="analises"><svg class="ico"><use href="#i-chart"/></svg> Análises</button>
     <button class="tab" type="button" data-aba="ia"><svg class="ico"><use href="#i-chat"/></svg> IA</button>
     <button class="tab" type="button" data-aba="jogo"><svg class="ico"><use href="#i-gamepad"/></svg> Onboarding</button>
+    <button class="tab" type="button" data-aba="blog"><svg class="ico"><use href="#i-heart"/></svg> Blog</button>
   </nav>
 
   <!-- ========== ITENS ========== -->
@@ -139,6 +141,22 @@
       <div class="game-strip" id="jogo-strip"></div>
       <div class="game-box"><iframe id="jogo-frame" title="Jogo de onboarding" allow="fullscreen"></iframe></div>
       <p class="game-help">Setas ou A/D: andar · Espaço: pular · E: interagir · Enter: avançar diálogos</p>
+    </div>
+  </section>
+
+  <!-- ========== BLOG ========== -->
+  <section id="aba-blog" class="aba">
+    <div class="blog">
+      <div class="blog-intro">
+        <h2>Blog da turma 💬</h2>
+        <p>Um espaço para os estagiários trocarem como foi o dia a dia. Leia, curta, comente e conte o seu também!</p>
+      </div>
+      <form class="card blog-novo" id="blog-form" autocomplete="off">
+        <input id="blog-titulo" maxlength="80" placeholder="Título do seu post" required>
+        <textarea id="blog-texto" rows="3" maxlength="500" placeholder="Como foi o seu dia hoje?" required></textarea>
+        <div class="blog-novo-f"><small>Publicando como <b id="blog-autor"></b></small><button class="btn-primary" type="submit">Publicar</button></div>
+      </form>
+      <div id="blog-lista"></div>
     </div>
   </section>
 
@@ -277,6 +295,11 @@
   <!-- Tela 3: conversa -->
   <div class="tela chat" data-tela="chat">
     <div class="chat-msgs" id="assist-msgs" aria-live="polite"></div>
+    <div class="sos-box">
+      <p>Caso ainda tenha dúvidas, sinta-se à vontade de chamar seu supervisor!</p>
+      <button type="button" class="sos-btn" id="sos-btn"><svg class="ico"><use href="#i-life"/></svg> SOS</button>
+      <small class="sos-ok" id="sos-ok" hidden>Pedido enviado! Seu supervisor foi avisado. 💜</small>
+    </div>
     <form class="assist-form" id="assist-form" autocomplete="off">
       <input id="assist-input" type="text" placeholder="Digite sua mensagem..." maxlength="300">
       <button class="enviar" aria-label="Enviar"><svg class="ico"><use href="#i-plane"/></svg></button>

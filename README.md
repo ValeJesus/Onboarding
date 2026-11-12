@@ -22,3 +22,8 @@ Localmente, basta dar dois cliques no `index.html`.
 - `plataforma.js` — usuários, sessão e progresso. `jogo/game.js` envia o progresso por `postMessage`.
 - Tudo é salvo no `localStorage`: colaborador e supervisor precisam usar o **mesmo navegador/computador**. Para uso real entre máquinas, troque `Progresso` e `Auth` por chamadas a um servidor.
 - As senhas ficam visíveis no código: isto é uma demonstração, não segurança real.
+
+## Novidades
+- **Game over:** mensagem "Um passo de cada vez. Estamos juntos nessa!" com o subtítulo "Travou na missão? Acione o SOS e peça reforços!" (`jogo/game.js`).
+- **SOS no assistente:** botão SOS na conversa da Kayla. Ao clicar, o supervisor vê o pedido no topo do painel (`supervisor.html`), com o botão "Marcar como atendido".
+- **Blog (aba Blog):** 3 posts de estagiários fictícios, mais curtidas, comentários e publicação de posts novos. Salvo no `localStorage` e compartilhado entre os usuários do mesmo navegador.

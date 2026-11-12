@@ -1,7 +1,7 @@
 // Pistas apresentadas na ordem em que são coletadas.
 window.DIALOGS = [
   "Observe como as pessoas se comunicam antes de escrever a primeira mensagem.",
-  "Cada pessoa do time sabe algo que você ainda não sabe. Descubra quem sabe o quê.",
+  "Repare nas rotinas e ferramentas do time para entender como o trabalho flui.",
   "Perguntar é uma forma de pesquisar, e quem pesquisa erra menos.",
   "Anote o que aprender: o que você observa hoje vira o seu plano amanhã.",
   "Errar no começo é esperado. Esconder o erro é o que pesa."
@@ -15,8 +15,8 @@ window.NPC_DIALOGS = {
     "Leve este guia e colete as pistas pelo prédio: elas mostram como o time trabalha. Cuidado com as Distrações!"
   ],
   2: [
-    "Os lasers estão no meu sistema.",
-    "Ative o interruptor e eu libero a passagem por alguns segundos.",
-    "Segure Shift para correr nos trechos livres. Observe os lasers e corra!"
+    "Os lasers estão ligados ao meu sistema. Observe o ritmo antes de atravessar.",
+    "Ative o interruptor com E para abrir uma janela segura por alguns segundos.",
+    "Recupere o projeto no cofre e siga para a saída enquanto a janela de fuga estiver aberta."
   ]
 };
