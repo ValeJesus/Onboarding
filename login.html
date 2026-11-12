@@ -15,14 +15,44 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-fullx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
 </defs></svg>
-<main class="login-page">
+<div class="entrada-tabs">
+  <nav class="tabs" role="tablist" aria-label="Escolha o que ver">
+    <button class="tab" type="button" role="tab" data-aba="slides" id="tab-slides"><svg class="ico"><use href="#i-slides"/></svg> Apresentação</button>
+    <button class="tab active" type="button" role="tab" data-aba="login" id="tab-login"><svg class="ico"><use href="#i-user"/></svg> Login</button>
+  </nav>
+</div>
+
+<!-- ========== APRESENTAÇÃO (slides do PowerPoint) ========== -->
+<section id="aba-slides" class="aba-entrada" hidden>
+  <div class="slides">
+    <div class="slide-stage">
+      <img id="slide-img" src="assets/slides/slide-1.jpg" alt="Slide 1 de 5">
+    </div>
+    <div class="slide-nav">
+      <button class="btn-icon" type="button" id="slide-prev" title="Slide anterior" aria-label="Slide anterior"><svg class="ico"><use href="#i-prev"/></svg></button>
+      <div class="slide-dots" id="slide-dots" role="tablist" aria-label="Slides"></div>
+      <span class="slide-count" id="slide-count">1 / 5</span>
+      <button class="btn-icon" type="button" id="slide-full" title="Tela cheia (F)" aria-label="Tela cheia"><svg class="ico"><use href="#i-full"/></svg></button>
+      <button class="btn-icon" type="button" id="slide-next" title="Próximo slide" aria-label="Próximo slide"><svg class="ico"><use href="#i-next"/></svg></button>
+    </div>
+    <button class="btn-primary slide-ir" type="button" data-aba="login">Ir para o login</button>
+  </div>
+</section>
+
+<main class="login-page aba-entrada" id="aba-login">
   <form class="card login" id="form" autocomplete="on">
     <div class="brand"><span class="brand-logo"><svg class="ico"><use href="#i-layers"/></svg></span><span><strong>Gerenciador</strong><small>Onboarding</small></span></div>
     <h1>Bem-vindo de volta</h1>
     <p class="sub">Entre com seu usuário para continuar</p>
     <div class="erro" id="erro" hidden>Usuário ou senha incorretos.</div>
-    <label>Usuário<input id="usuario" autocomplete="username" required autofocus></label>
+    <label>Usuário<input id="usuario" autocomplete="username" required></label>
     <label>Senha<input id="senha" type="password" autocomplete="current-password" required></label>
     <button class="btn-primary" type="submit">Entrar</button>
     <div class="demo">Contas de demonstração (clique para preencher):
@@ -37,6 +67,72 @@
   document.querySelectorAll('.demo button').forEach((b) => b.addEventListener('click', () => {
     $('usuario').value = b.dataset.u; $('senha').value = b.dataset.s; $('senha').focus();
   }));
+  /* ---- troca entre Apresentação e Login (mesmo efeito de Análises <-> IA) ---- */
+  const TOTAL = 5; let atual = 1;
+  const img = $('slide-img');
+  $('slide-dots').innerHTML = Array.from({ length: TOTAL }, (_, i) =>
+    `<button type="button" role="tab" data-slide="${i + 1}" aria-label="Slide ${i + 1}"></button>`).join('');
+  function irSlide(n) {
+    atual = Math.min(TOTAL, Math.max(1, n));
+    img.src = `assets/slides/slide-${atual}.jpg`;
+    img.alt = `Slide ${atual} de ${TOTAL}`;
+    $('slide-count').textContent = `${atual} / ${TOTAL}`;
+    $('slide-prev').disabled = atual === 1;
+    $('slide-next').disabled = atual === TOTAL;
+    document.querySelectorAll('#slide-dots button').forEach((b) =>
+      b.classList.toggle('on', Number(b.dataset.slide) === atual));
+  }
+  /* ---- tela cheia (usa a API do navegador; se não houver, cobre a janela com CSS) ---- */
+  const caixa = document.querySelector('.slides');
+  const emTelaCheia = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || caixa.classList.contains('tela-cheia');
+  function atualizarTelaCheia() {
+    const on = emTelaCheia();
+    $('slide-full').querySelector('use').setAttribute('href', on ? '#i-fullx' : '#i-full');
+    $('slide-full').title = on ? 'Sair da tela cheia (Esc)' : 'Tela cheia (F)';
+    $('slide-full').setAttribute('aria-label', $('slide-full').title);
+  }
+  async function alternarTelaCheia() {
+    if (emTelaCheia()) {
+      caixa.classList.remove('tela-cheia');
+      try { if (document.fullscreenElement) await document.exitFullscreen(); else if (document.webkitFullscreenElement) document.webkitExitFullscreen(); } catch (e) {}
+    } else {
+      try {
+        if (caixa.requestFullscreen) await caixa.requestFullscreen();
+        else if (caixa.webkitRequestFullscreen) caixa.webkitRequestFullscreen();
+        else caixa.classList.add('tela-cheia');
+      } catch (e) { caixa.classList.add('tela-cheia'); }
+    }
+    atualizarTelaCheia();
+  }
+  $('slide-full').addEventListener('click', alternarTelaCheia);
+  document.addEventListener('fullscreenchange', atualizarTelaCheia);
+  document.addEventListener('webkitfullscreenchange', atualizarTelaCheia);
+  function mostrarAba(nome) {
+    const slides = nome === 'slides';
+    $('aba-slides').hidden = !slides;
+    $('aba-login').hidden = slides;
+    if (!slides && emTelaCheia()) alternarTelaCheia();
+    $('tab-slides').classList.toggle('active', slides);
+    $('tab-login').classList.toggle('active', !slides);
+    $('tab-slides').setAttribute('aria-selected', slides);
+    $('tab-login').setAttribute('aria-selected', !slides);
+    history.replaceState(null, '', slides ? '#apresentacao' : location.pathname + location.search);
+    if (!slides) $('usuario').focus({ preventScroll: true });
+  }
+  document.querySelectorAll('[data-aba]').forEach((b) => b.addEventListener('click', () => mostrarAba(b.dataset.aba)));
+  $('slide-prev').addEventListener('click', () => irSlide(atual - 1));
+  $('slide-next').addEventListener('click', () => irSlide(atual + 1));
+  $('slide-dots').addEventListener('click', (e) => { const b = e.target.closest('[data-slide]'); if (b) irSlide(Number(b.dataset.slide)); });
+  document.addEventListener('keydown', (e) => {
+    if ($('aba-slides').hidden) return;
+    if (e.key === 'ArrowRight') irSlide(atual + 1);
+    if (e.key === 'ArrowLeft') irSlide(atual - 1);
+    if (e.key === 'f' || e.key === 'F') alternarTelaCheia();
+    if (e.key === 'Escape' && caixa.classList.contains('tela-cheia')) alternarTelaCheia();
+  });
+  irSlide(1);
+  if (location.hash === '#apresentacao') mostrarAba('slides');
+
   $('form').addEventListener('submit', (e) => {
     e.preventDefault();
     const s = Auth.entrar($('usuario').value, $('senha').value);
